@@ -1,16 +1,2 @@
-import React from "react";
 
-const RecipeCard = ({ name, time, serving }) => {
-  return (
-    <div className="bg-gray-100 rounded-md p-4">
-      <div className="bg-gray-300 w-full h-32 rounded mb-3"></div>
-
-      <p className="font-semibold">{name}</p>
-      <p className="text-sm text-gray-600 mt-1">⏱ {time}</p>
-      <p className="text-sm text-gray-600">{serving}</p>
-    </div>
-  );
-};
-
-export default RecipeCard;
 
