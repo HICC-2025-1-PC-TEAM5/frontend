@@ -1,16 +1,16 @@
-import styles from './TextInput.module.css';
+import './TextInput.css';
 
-function Button(props) {
-  const { type = 'text', placeholder, label } = props;
+export default function (props) {
+  const { type = 'text', placeholder, label, message, error } = props;
 
   return (
     <div>
       <label>{label}</label>
-      <input type={type} placeholder={placeholder}>
+      <input type={type} placeholder={placeholder} spellCheck='false'>
         {props.children}
       </input>
+      <p className='message error'>{error}</p>
+      <p className='message'>{message}</p>
     </div>
   );
 }
-
-export default Button;

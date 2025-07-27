@@ -4,6 +4,8 @@ import viteLogo from '/vite.svg';
 import './App.css';
 import Button from './components/primary/Button';
 import TextInput from './components/primary/TextInput';
+import DateInput from './components/primary/DateInput';
+import OptionsInput from './components/primary/OptionsInput';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -21,7 +23,17 @@ function App() {
         type='number'
         placeholder='여기에 뭐를 입력하세요'
         label='라벨 이름'
+        message='뭔가 메시지가 있습니다'
+        error='에러 메시지가 있습니다'
       ></TextInput>
+
+      <DateInput></DateInput>
+
+      <OptionsInput>
+        <option>선택지 1번</option>
+        <option>선택지 2번</option>
+        <option>선택지 3번 옵션은 이름이 더 길다랗게 적혀 있음</option>
+      </OptionsInput>
     </div>
   );
 }
