@@ -1,0 +1,85 @@
+:root {
+  --input-color-bg: var(--color-tone-2);
+  --input-color-fg: var(--color-tone-12);
+  --input-color-ol: var(--color-tone-3);
+  --input-color-pl: var(--color-tone-10);
+
+  --input-color-fg-focus: var(--color-tone-13);
+  --input-color-ol-focus: var(--color-tone-10);
+
+  --input-color-bg-disabled: var(--color-tone-2);
+  --input-color-fg-disabled: var(--color-tone-12);
+  --input-color-ol-disabled: var(--color-tone-3);
+  --input-color-pl-disabled: var(--color-tone-10);
+}
+
+label {
+  display: block;
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+
+input {
+  position: relative;
+  vertical-align: baseline;
+  box-sizing: border-box;
+  display: inline-block;
+  height: var(--size-360);
+  padding: 0 var(--size-120);
+  margin: 0;
+  background: var(--input-color-bg);
+  color: var(--input-color-fg);
+  border: solid var(--size-10) var(--input-color-ol);
+  border-radius: var(--size-100);
+  outline: none;
+  font-family: var(--sans-serif);
+  font-size: var(--size-144);
+  font-weight: 400;
+  line-height: 125%;
+  text-align: left;
+  text-decoration: none;
+  transition: background ease-out 0.1s, border-color ease-out 0.1s;
+  transform: translateX(0);
+}
+input:focus {
+  color: var(--input-color-fg-focus);
+  border-color: var(--input-color-ol-focus);
+}
+input::placeholder,
+input::-webkit-input-placeholder {
+  color: var(--input-color-pl);
+}
+input:disabled {
+  color: var(--input-color-fg-disabled);
+  background: var(--input-color-bg-disabled);
+  border-color: var(--input-color-ol-disabled);
+}
+input:disabled::placeholder,
+input:disabled::-webkit-input-placeholder {
+  color: var(--input-color-pl-focus);
+}
+input:read-only:focus {
+  border-color: var(--ol-focus);
+}
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: var(--input-color-fg);
+  transition: background-color 5000s ease-in-out 0s;
+  box-shadow: inset 0 0 20px 20px var(--input-color-bg);
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+input[type='date'],
+input[type='datetime-local'] {
+  -webkit-appearance: none;
+  -webkit-min-logical-width: 100%;
+}
