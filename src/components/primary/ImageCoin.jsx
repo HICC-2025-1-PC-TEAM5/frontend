@@ -1,6 +1,6 @@
-import styles from "./ImageCoin.module.css";
+import styles from './ImageCoin.module.css';
 
-function ImageCard({ imageSrc, text, variant = "medium" }) {
+function ImageCard({ imageSrc, text, variant = 'medium' }) {
   const hasImage = Boolean(imageSrc);
   const variantClass = styles[`box-${variant}`];
 

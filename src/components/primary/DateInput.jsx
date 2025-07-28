@@ -6,9 +6,9 @@ export default function (props) {
   return (
     <div>
       <label>{label}</label>
-      <input type='datetime-local'>{props.children}</input>
-      <p className='message error'>{error}</p>
-      <p className='message'>{message}</p>
+      <input type="datetime-local">{props.children}</input>
+      <p className="message error">{error}</p>
+      <p className="message">{message}</p>
     </div>
   );
 }

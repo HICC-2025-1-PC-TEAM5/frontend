@@ -6,11 +6,11 @@ export default function (props) {
   return (
     <div>
       <label>{label}</label>
-      <select type={type} placeholder={placeholder} spellCheck='false'>
+      <select type={type} placeholder={placeholder} spellCheck="false">
         {props.children}
       </select>
-      <p className='message error'>{error}</p>
-      <p className='message'>{message}</p>
+      <p className="message error">{error}</p>
+      <p className="message">{message}</p>
     </div>
   );
 }

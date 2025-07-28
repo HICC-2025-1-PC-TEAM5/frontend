@@ -1,6 +1,6 @@
-import styles from "./ImageCard.module.css";
+import styles from './ImageCard.module.css';
 
-function ImageCard({ imageSrc, text, variant = "small" }) {
+function ImageCard({ imageSrc, text, variant = 'small' }) {
   const variantClass = styles[`card-${variant}`];
 
   return (

@@ -1,13 +1,13 @@
-import "./App.css";
-import Button from "./components/primary/Button";
-import TextInput from "./components/primary/TextInput";
-import DateInput from "./components/primary/DateInput";
-import OptionsInput from "./components/primary/OptionsInput";
-import ImageCard from "./components/primary/ImageCard";
-import ImageCoin from "./components/primary/ImageCoin";
-import SelectHeader from "./components/Recipe/SelectHeader";
+import './App.css';
+import Button from './components/primary/Button';
+import TextInput from './components/primary/TextInput';
+import DateInput from './components/primary/DateInput';
+import OptionsInput from './components/primary/OptionsInput';
+import ImageCard from './components/primary/ImageCard';
+import ImageCoin from './components/primary/ImageCoin';
+import SelectHeader from './components/Recipe/SelectHeader';
 
-import Footer from "./components/primary/Footer";
+import Footer from './components/primary/Footer';
 
 function App() {
   return (
