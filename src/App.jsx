@@ -1,19 +1,28 @@
-import { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
-import './App.css';
-import Button from './components/primary/Button';
+import "./App.css";
+import Button from "./components/primary/Button";
+import ImageCard from "./components/primary/ImageCard";
+import ImageCoin from "./components/primary/ImageCoin";
+import SelectHeader from "./components/Recipe/SelectHeader";
+import Footer from "./components/primary/Footer";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
     <div>
+      <SelectHeader />
+      <br></br>
       <Button>버튼 내용 1</Button>
       <br></br>
-      <Button variant='invisible'>버튼 내용 2</Button>
+      <Button variant="default">버튼 내용 2</Button>
       <br></br>
-      <Button variant='primary'>버튼 내용 2</Button>
+      <Button variant="primary">버튼 내용 2</Button>
+      <br></br>
+      <Button variant="danger">버튼 내용3</Button>
+      <br></br>
+      <ImageCard imageSrc="/img/a.jpg" text="재료 이름" />
+
+      <br></br>
+      <ImageCoin imageSrc="" text="재료 처리" variant="medium" />
+      <Footer />
     </div>
   );
 }

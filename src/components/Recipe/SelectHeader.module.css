@@ -1,0 +1,35 @@
+.segmentedControl {
+  display: flex;
+  gap: 1rem;
+}
+
+.tabButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6e7781; /* 기본 회색 */
+  font-size: 0.75rem;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 4px;
+  stroke: currentColor;
+  fill: none; /* 아이콘 색상 글자색과 연동 */
+}
+
+.label {
+  font-size: 12px;
+}
+
+.tabButton.active {
+  color: #000; /* 선택 시 검정 */
+}
+
+.tabButton:focus {
+  outline: none;
+}
