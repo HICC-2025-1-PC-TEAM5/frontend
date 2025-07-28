@@ -1,68 +1,159 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
+
+html {
+  font-size: 16px;
+}
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  --color-tone-0: white;
+  --color-tone-1: hsl(22 20% 95%);
+  --color-tone-2: hsl(22 15% 90%);
+  --color-tone-3: hsl(22 10% 85%);
+  --color-tone-4: hsl(22 7% 80%);
+  --color-tone-5: hsl(22 7% 75%);
+  --color-tone-6: hsl(22 7% 70%);
+  --color-tone-7: hsl(22 7% 65%);
+  --color-tone-8: hsl(22 5% 60%);
+  --color-tone-9: hsl(22 5% 55%);
+  --color-tone-10: hsl(22 5% 50%);
+  --color-tone-11: hsl(22 5% 40%);
+  --color-tone-12: hsl(22 10% 30%);
+  --color-tone-13: hsl(22 10% 20%);
+  --color-tone-14: hsl(22 10% 10%);
+  --color-tone-15: black;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  --color-logo: rgb(108, 136, 63);
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --color-tone-0: white;
+  --color-tone-1: hsl(245, 20%, 95%);
+  --color-tone-2: hsl(245 15% 90%);
+  --color-tone-3: hsl(245 10% 85%);
+  --color-tone-4: hsl(245 7% 80%);
+  --color-tone-5: hsl(245 7% 75%);
+  --color-tone-6: hsl(245, 7%, 70%);
+  --color-tone-7: hsl(245 7% 65%);
+  --color-tone-8: hsl(245 5% 60%);
+  --color-tone-9: hsl(245 5% 55%);
+  --color-tone-10: hsl(245 5% 50%);
+  --color-tone-11: hsl(245 5% 40%);
+  --color-tone-12: hsl(245 10% 30%);
+  --color-tone-13: hsl(245 10% 20%);
+  --color-tone-14: hsl(245 10% 10%);
+  --color-tone-15: black;
+  --color-logo: rgb(67, 141, 78);
+
+  --th: #d2b0dd;
+
+  --red-light: rgb(255, 236, 235);
+  --red-light2: rgb(255, 59, 48);
+  --red-light1: rgb(255, 59, 48);
+  --red: rgb(255, 59, 48);
+  --red-dark1: rgb(224, 42, 33);
+  --red-dark2: rgb(209, 33, 23);
+  --red-dark3: rgb(192, 10, 0);
+
+  --orange: rgb(255, 149, 0);
+  --yellow: rgb(255, 204, 0);
+  --green: rgb(40, 205, 64);
+  --blue: rgb(0, 122, 255);
+  --purple: rgb(175, 82, 222);
+  --pink: rgb(255, 45, 85);
+
+  --button-bg: var(--light2);
+  --button-fg: var(--dark3);
+  --button-ol: var(--light5);
+
+  --button-bg-hover: var(--light4);
+  --button-fg-hover: var(--black);
+  --button-ol-hover: var(--black);
+
+  --button-bg-active: var(--gray3);
+  --button-fg-active: var(--black);
+  --button-ol-active: var(--gray6);
+
+  --button-bg-disabled: var(--light2);
+  --button-fg-disabled: var(--gray1);
+  --button-ol-disabled: var(--light5);
+
+  --ol-focus: var(--color-tone-10);
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+.red {
+  color: red;
 }
-a:hover {
-  color: #535bf2;
+
+:root {
+  --size-10: 0.0625rem;
+  --size-16: 0.1rem;
+  --size-20: 0.125rem;
+  --size-40: 0.25rem;
+  --size-60: 0.375rem;
+  --size-70: 0.438rem;
+  --size-80: 0.5rem;
+  --size-100: 0.625rem;
+  --size-120: 0.75rem;
+  --size-128: 0.8rem;
+  --size-144: 0.9rem;
+  --size-160: 1rem;
+  --size-180: 1.125rem;
+  --size-200: 1.25rem;
+  --size-240: 1.5rem;
+  --size-280: 1.75rem;
+  --size-320: 2rem;
+  --size-360: 2.25rem;
+  --size-400: 2.5rem;
+  --size-480: 3rem;
+
+  --size-radius-default: 0.625rem;
+  --size-radius-default: 0.625rem;
+
+  --font-size: var(--size-160);
+}
+
+* {
+  font-family: 'Pretendard Variable';
+  box-sizing: border-box;
 }
 
 body {
+  width: 100%;
+  height: 100vh;
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  word-break: keep-all;
+  background: var(--color-tone-1);
+  color: var(--color-tone-13);
+  fill: var(--color-tone-13);
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+p,
+a,
+span,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+label,
+input,
+textarea {
+  margin: 0;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+a,
+a:hover,
+a:active {
+  color: var(--color-tone-13);
+  text-decoration: none;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.outwrapper {
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+.outwrapper[content] {
+  max-width: 46rem;
+}
+.outwrapper[form] {
+  max-width: 24rem;
 }
