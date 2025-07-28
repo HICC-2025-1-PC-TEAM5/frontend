@@ -1,6 +1,11 @@
 .segmentedControl {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
   display: flex;
   gap: 1rem;
+  z-index: 10000;
 }
 
 .tabButton {

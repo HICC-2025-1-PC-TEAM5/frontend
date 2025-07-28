@@ -1,54 +1,50 @@
-import './App.css';
-import Button from './components/primary/Button';
-import TextInput from './components/primary/TextInput';
-import DateInput from './components/primary/DateInput';
-import OptionsInput from './components/primary/OptionsInput';
-import ImageCard from './components/primary/ImageCard';
-import ImageCoin from './components/primary/ImageCoin';
-import SelectHeader from './components/Recipe/SelectHeader';
+import { BrowserRouter, Routes, Route } from 'react-router';
+import Main from './pages/Main/Main';
+import RecipesRouter from './pages/Recipes/RecipesRouter';
+import FridgeRouter from './pages/Fridge/FridgeRouter';
+import ProfileRouter from './pages/Profile/ProfileRouter';
+import SettingsRouter from './pages/Settings/SettingsRouter';
 
+import './App.css';
 import Footer from './components/primary/Footer';
+
+/*
+
+/ >> 메인
+
+/recipes >> 레시피 목록 (전체 카테고리)
+/recipes?category="카테고리" >> 특정 카테고리의 레시피 목록
+/recipes?search="검색어" >> 검색한 레시피 목록
+/recipes/:rid >> 특정 레시피 (인분 선택)
+/recipes/:rid/cooking >> 레시피 조리 과정 (조리 시작)
+/recipes/:rid/complete >> 조리 완료 후 사용된 제료 삭제
+
+/fridge >> 냉장고, 재료들을 보여줌
+/fridge/ingredients/:iid
+/fridge/add >> 재료 추가 방법 선택
+/fridge/add/form >> 재료 추가 (직접 입력)
+/fridge/add/camera >> 재료 추가 (카메라, 재료 직접 촬영)
+/fridge/add/camera-receipt >> 재료 추가 (카메라, 영수증, 바코드 촬영)
+
+/profile >> 마이페이지
+
+/settings/profile >> 마이페이지 설정
+
+*/
 
 function App() {
   return (
-    <div>
-      <SelectHeader />
-      <br></br>
-      <Footer />
-      <br></br>
+    <BrowserRouter>
+      <Routes>
+        <Route index element={<Main />} />
+        <Route path="recipes/*" element={<RecipesRouter />} />
+        <Route path="fridge/*" element={<FridgeRouter />} />
+        <Route path="profile/*" element={<ProfileRouter />} />
+        <Route path="settings/*" element={<SettingsRouter />} />
+      </Routes>
 
-      <Button>버튼 내용 1</Button>
-      <br></br>
-      <Button variant="default">버튼 내용 2</Button>
-      <br></br>
-      <Button variant="primary">버튼 내용 2</Button>
-      <br></br>
-      <Button variant="danger">버튼 내용3</Button>
-      <br></br>
-      <ImageCard imageSrc="/img/a.jpg" text="재료 이름" />
-      <br></br>
-      <ImageCoin imageSrc="" text="재료 이름" />
-
-      <br></br>
-      <Button variant="primary">버튼 내용 2</Button>
-      <br></br>
-      <br></br>
-      <TextInput
-        type="number"
-        placeholder="여기에 뭐를 입력하세요"
-        label="라벨 이름"
-        message="뭔가 메시지가 있습니다"
-        error="에러 메시지가 있습니다"
-      ></TextInput>
-
-      <DateInput></DateInput>
-
-      <OptionsInput>
-        <option>선택지 1번</option>
-        <option>선택지 2번</option>
-        <option>선택지 3번 옵션은 이름이 더 길다랗게 적혀 있음</option>
-      </OptionsInput>
-    </div>
+      <Footer></Footer>
+    </BrowserRouter>
   );
 }
 
