@@ -13,7 +13,7 @@ const tabs = [
   { id: "d", label: "마이페이지", Icon: MyPage },
 ];
 
-export default function SelectHeader() {
+export default function Footer() {
   const [selected, setSelected] = useState("a");
 
   return (

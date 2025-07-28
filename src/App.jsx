@@ -6,6 +6,7 @@ import OptionsInput from "./components/primary/OptionsInput";
 import ImageCard from "./components/primary/ImageCard";
 import ImageCoin from "./components/primary/ImageCoin";
 import SelectHeader from "./components/Recipe/SelectHeader";
+
 import Footer from "./components/primary/Footer";
 
 function App() {
@@ -13,6 +14,9 @@ function App() {
     <div>
       <SelectHeader />
       <br></br>
+      <Footer />
+      <br></br>
+
       <Button>버튼 내용 1</Button>
       <br></br>
       <Button variant="default">버튼 내용 2</Button>
@@ -22,6 +26,8 @@ function App() {
       <Button variant="danger">버튼 내용3</Button>
       <br></br>
       <ImageCard imageSrc="/img/a.jpg" text="재료 이름" />
+      <br></br>
+      <ImageCoin imageSrc="" text="재료 이름" />
 
       <br></br>
       <Button variant="primary">버튼 내용 2</Button>
