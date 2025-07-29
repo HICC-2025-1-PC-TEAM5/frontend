@@ -1,0 +1,33 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* 전체 화면 */
+  background: white;
+}
+
+/* 상단 고정 영역 */
+.header {
+  position: sticky; /* 스크롤해도 상단 고정 */
+  top: 0;
+  background: white; /* 배경색 지정해서 아래 요소 가리지 않음 */
+  z-index: 10;
+  padding: 16px;
+  border-bottom: 1px solid #ddd;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-top: 3rem;
+  margin-bottom: 3.5rem;
+}
+
+/* 스크롤되는 콘텐츠 */
+.content {
+  flex: 1;
+  overflow-y: auto; /* 세로 스크롤 가능 */
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
