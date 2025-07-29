@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router';
 import styles from './Recipe.module.css';
-import RecipeInfo from '../../../components/Recipe/RecipeInfo';
-import ImageCoin from '../../../components/primary/ImageCoin';
-import Button from '../../../components/primary/Button';
+import RecipeInfo from '../components/RecipeInfo';
+import ImageCoin from '../../../components/ImageCoin';
+import Button from '../../../components/Button';
 
 const ingredientsNo = [
   { id: 1, imageSrc: '', text: '이름', variant: 'medium' },

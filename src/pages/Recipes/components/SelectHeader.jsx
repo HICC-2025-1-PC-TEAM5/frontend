@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import styles from './SelectHeader.module.css';
 
-import IconA from '../../assets/svg/Recipe/iconA.svg?react';
-import IconB from '../../assets/svg/Recipe/iconB.svg?react';
-import IconC from '../../assets/svg/Recipe/iconC.svg?react';
-import IconD from '../../assets/svg/Recipe/iconD.svg?react';
-import IconE from '../../assets/svg/Recipe/iconE.svg?react';
-import IconF from '../../assets/svg/Recipe/iconF.svg?react';
+import IconA from '../../../assets/svg/Recipe/iconA.svg?react';
+import IconB from '../../../assets/svg/Recipe/iconB.svg?react';
+import IconC from '../../../assets/svg/Recipe/iconC.svg?react';
+import IconD from '../../../assets/svg/Recipe/iconD.svg?react';
+import IconE from '../../../assets/svg/Recipe/iconE.svg?react';
+import IconF from '../../../assets/svg/Recipe/iconF.svg?react';
 
 const tabs = [
   { id: 'a', label: '전체', Icon: IconA },
