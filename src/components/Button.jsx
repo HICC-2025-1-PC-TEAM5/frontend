@@ -1,7 +1,7 @@
 import styles from './Button.module.css';
 
 function Button(props) {
-  const { variant = 'invisible' } = props;
+  const { variant = 'default' } = props;
 
   return <button variant={variant}>{props.children}</button>;
 }

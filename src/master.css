@@ -114,15 +114,22 @@ html {
   font-family: 'Pretendard Variable';
   box-sizing: border-box;
 }
-
+html {
+  width: 100%;
+  height: 100%;
+}
 body {
   width: 100%;
-  height: 100vh;
+  height: 100%;
   margin: 0;
   word-break: keep-all;
   background: var(--color-tone-1);
   color: var(--color-tone-13);
   fill: var(--color-tone-13);
+}
+body #root {
+  width: 100%;
+  height: 100%;
 }
 
 p,

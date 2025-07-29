@@ -1,16 +1,21 @@
 import { BrowserRouter, Routes, Route } from 'react-router';
-import Main from './pages/Main/Main';
+import Home from './pages/Home/Home';
+import Intro from './pages/Home/Intro';
+import AuthStart from './pages/Auth/AuthStart';
+import AuthLogin from './pages/Auth/AuthLogin';
 import RecipesRouter from './pages/Recipes/RecipesRouter';
 import FridgeRouter from './pages/Fridge/FridgeRouter';
 import ProfileRouter from './pages/Profile/ProfileRouter';
 import SettingsRouter from './pages/Settings/SettingsRouter';
 
-import './App.css';
-import Footer from './components/primary/Footer';
+import style from './App.module.css';
 
 /*
 
 / >> 메인
+
+/start >> 시작하기 (회완가입)
+/login >> 로그인 
 
 /recipes >> 레시피 목록 (전체 카테고리)
 /recipes?category="카테고리" >> 특정 카테고리의 레시피 목록
@@ -32,20 +37,39 @@ import Footer from './components/primary/Footer';
 
 */
 
-function App() {
-  return (
-    <BrowserRouter>
+const session = {
+  cookie: {
+    name: 'session',
+  },
+};
+
+export default () => {
+  let routes;
+  if (true) {
+    routes = (
       <Routes>
-        <Route index element={<Main />} />
+        <Route index element={<Home />} />
         <Route path="recipes/*" element={<RecipesRouter />} />
         <Route path="fridge/*" element={<FridgeRouter />} />
         <Route path="profile/*" element={<ProfileRouter />} />
         <Route path="settings/*" element={<SettingsRouter />} />
       </Routes>
+    );
+  } else {
+    routes = (
+      <Routes>
+        <Route index element={<Intro />} />
+        <Route path="start" element={<AuthStart />} />
+        <Route path="login" element={<AuthLogin />} />
+      </Routes>
+    );
+  }
 
-      <Footer></Footer>
-    </BrowserRouter>
+  return (
+    <div className={style.app}>
+      <div className={style.wrapper}>
+        <BrowserRouter>{routes}</BrowserRouter>
+      </div>
+    </div>
   );
-}
-
-export default App;
+};
