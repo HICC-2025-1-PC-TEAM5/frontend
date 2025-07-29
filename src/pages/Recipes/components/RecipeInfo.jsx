@@ -1,9 +1,9 @@
 import styles from './RecipeInfo.module.css';
 
-import TimeIcon from '../../assets/svg/Recipe/time.svg?react';
-import PeopleIcon from '../../assets/svg/Recipe/people.svg?react';
-import UsageIcon from '../../assets/svg/Recipe/people.svg?react';
-import DifficultyIcon from '../../assets/svg/Recipe/people.svg?react';
+import TimeIcon from '../../../assets/svg/Recipe/time.svg?react';
+import PeopleIcon from '../../../assets/svg/Recipe/people.svg?react';
+import UsageIcon from '../../../assets/svg/Recipe/people.svg?react';
+import DifficultyIcon from '../../../assets/svg/Recipe/people.svg?react';
 
 function RecipeInfo({
   imageSrc = '',

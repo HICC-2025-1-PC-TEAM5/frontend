@@ -6,6 +6,7 @@ import Nav from '../../components/Nav';
 export default function () {
   return (
     <>
+      <h1>냉장고</h1>
       <Nav></Nav>
     </>
   );
