@@ -9,6 +9,7 @@ import ProfileRouter from './pages/Profile/ProfileRouter';
 import SettingsRouter from './pages/Settings/SettingsRouter';
 
 import style from './App.module.css';
+import ComponentsTest from './components/ComponentsTest';
 
 /*
 
@@ -47,28 +48,31 @@ export default () => {
   let routes;
   if (true) {
     routes = (
-      <Routes>
+      <>
         <Route index element={<Home />} />
         <Route path="recipes/*" element={<RecipesRouter />} />
         <Route path="fridge/*" element={<FridgeRouter />} />
         <Route path="profile/*" element={<ProfileRouter />} />
         <Route path="settings/*" element={<SettingsRouter />} />
-      </Routes>
+        <Route path="test/components" element={<ComponentsTest />} />
+      </>
     );
   } else {
     routes = (
-      <Routes>
+      <>
         <Route index element={<Intro />} />
         <Route path="start" element={<AuthStart />} />
         <Route path="login" element={<AuthLogin />} />
-      </Routes>
+      </>
     );
   }
 
   return (
     <div className={style.app}>
       <div className={style.wrapper}>
-        <BrowserRouter>{routes}</BrowserRouter>
+        <BrowserRouter>
+          <Routes>{routes}</Routes>
+        </BrowserRouter>
       </div>
     </div>
   );

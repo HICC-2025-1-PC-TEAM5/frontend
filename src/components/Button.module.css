@@ -19,12 +19,8 @@
   --button-fg-disabled: var(--gray1);
   --button-ol-disabled: var(--light3);
 }
-wn-button {
-  display: inline-block;
-}
-button,
-[type='button'],
-wn-button::part(button) {
+
+button {
   position: relative;
   vertical-align: baseline;
   box-sizing: border-box;
@@ -47,33 +43,35 @@ wn-button::part(button) {
   transform: translateX(0);
   cursor: pointer;
 }
+button[size_='small'] {
+  min-height: var(--size-240);
+  padding: 0 var(--size-80);
+  border-radius: var(--size-70);
+  font-size: var(--size-128);
+  line-height: var(--size-200);
+}
+
 button[block],
 [type='button'][block],
 wn-button[block],
 wn-button[block]::part(button) {
   display: block;
 }
-button[left],
-[type='button'][left],
-wn-button[left]::part(button) {
+button[align='left'] {
   text-align: left;
 }
-button[right],
-[type='button'][right],
-wn-button[right]::part(button) {
+button[align='right'] {
   text-align: right;
 }
-button[round],
-[type='button'][round],
-wn-button[round]::part(button) {
+
+button[border='round'] {
   border-radius: var(--size-180);
 }
-button[ellipse],
-[type='button'][ellipse],
-wn-button[ellipse]::part(button) {
+button[border='ellipse'] {
   border-radius: 100% 100%;
   padding: 0 var(--size-240);
 }
+
 button[icon='only'],
 [type='button'][icon='only'],
 wn-button[icon='only'] {
