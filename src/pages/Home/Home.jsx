@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import styles from './Main.module.css';
-import LogoIcon from '../../assets/svg/Main/logo.svg?react';
+import style from './Home.module.css';
+import Nav from '../../components/Nav';
 
 export default function Main({ username = '홍길동' }) {
   return (
