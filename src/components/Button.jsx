@@ -1,9 +1,11 @@
 import styles from './Button.module.css';
 
-function Button(props) {
-  const { variant = 'default' } = props;
-
-  return <button variant={variant}>{props.children}</button>;
+function Button({ children, variant = 'default', onClick, disabled, ...rest }) {
+  return (
+    <button variant={variant} onClick={onClick} disabled={disabled} {...rest}>
+      {children}
+    </button>
+  );
 }
 
 export default Button;
