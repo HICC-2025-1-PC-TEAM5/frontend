@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import styles from './Home.module.css';
 import Nav from '../../components/Nav';
 import LogoIcon from '../../assets/svg/Main/logo.svg?react';
+import SearchInput from './components/SearchInput';
 
 export default function Main({ username = '홍길동' }) {
   return (
@@ -17,8 +18,9 @@ export default function Main({ username = '홍길동' }) {
           <br />
           어떤 음식을 요리해볼까요?
         </h1>
+        <SearchInput onSearch={(value) => console.log(value)} />
       </div>
-      <Nav></Nav>
+      <Nav />
     </>
   );
 }
