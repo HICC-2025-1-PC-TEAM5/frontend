@@ -34,3 +34,7 @@
 .stack[wrap='wrap'] {
   flex-wrap: wrap;
 }
+
+.stack[rows='3'] > * {
+  width: calc((100% - 2rem) / 3);
+}

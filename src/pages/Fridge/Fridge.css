@@ -1,0 +1,61 @@
+.header {
+  padding-top: 3rem;
+  margin-bottom: 2rem;
+}
+.header h1 {
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.index {
+  margin-top: 2rem;
+}
+.filter .stack,
+.category .stack,
+.sort .stack {
+  width: 100%;
+  height: 2rem;
+  overflow-x: auto;
+}
+.nav .button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.9rem;
+  height: 100%;
+  color: gray;
+}
+.filter .button.selected {
+  color: black;
+  border-bottom: solid 2px black;
+}
+.category {
+  background: lightgray;
+}
+.category .button.selected {
+  color: black;
+}
+.sort .count {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.9rem;
+  color: black;
+}
+.sort .select {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.9rem;
+  color: black;
+}
+
+.recommands {
+  margin-top: 2rem;
+}
+.recommands .message {
+  margin-bottom: 2rem;
+}
+.recommands .message p {
+  font-weight: bold;
+}
