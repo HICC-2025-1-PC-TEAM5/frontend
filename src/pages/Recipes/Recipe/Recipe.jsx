@@ -3,6 +3,7 @@ import styles from './Recipe.module.css';
 import RecipeInfo from '../components/RecipeInfo';
 import ImageCoin from '../../../components/ImageCoin';
 import Button from '../../../components/Button';
+import PeopleCounter from '../components/PeopleCounter';
 
 const ingredientsNo = [
   { id: 1, imageSrc: '', text: '이름', variant: 'medium' },
@@ -13,6 +14,7 @@ const ingredientsYes = [
   { id: 1, imageSrc: '', text: '이름', variant: 'medium' },
   { id: 2, imageSrc: '', text: '이름', variant: 'medium' },
 ];
+
 function Recipe() {
   const navigate = useNavigate();
   const handleBack = () => {
@@ -27,9 +29,11 @@ function Recipe() {
         </button>
         <h1 className={styles.title}>레시피</h1>
       </header>
-      {/*요리 정보*/}
+
+      {/* 요리 정보 */}
       <RecipeInfo />
-      {/*재료 표시*/}
+
+      {/* 재료 표시 */}
       <section className={styles.ingredientsSection}>
         <h2 className={styles.subtitle}>재료</h2>
 
@@ -57,7 +61,8 @@ function Recipe() {
           ))}
         </div>
       </section>
-      {/*조리도구*/}
+
+      {/* 조리도구 */}
       <section className={styles.toolsSection}>
         <h2 className={styles.subtitle}>조리도구</h2>
         <div className={styles.toolsButtonGroup}>
@@ -66,6 +71,11 @@ function Recipe() {
           <Button variant="default">요리 집게</Button>
         </div>
       </section>
+
+      {/* 하단 고정 PeopleCounter */}
+      <div className={styles.footer}>
+        <PeopleCounter />
+      </div>
     </div>
   );
 }
