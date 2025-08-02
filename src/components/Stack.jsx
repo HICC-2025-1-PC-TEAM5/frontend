@@ -3,6 +3,7 @@ import styles from './Stack.module.css';
 export default (props) => {
   const {
     className,
+    fill,
     direction = 'horizontal',
     justify,
     align,
@@ -15,6 +16,7 @@ export default (props) => {
   return (
     <div
       className={`${styles.stack} ${className}`}
+      fill={fill}
       direction={direction}
       justify={justify}
       align={align}

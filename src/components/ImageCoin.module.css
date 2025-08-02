@@ -21,6 +21,10 @@
   font-size: 0.8rem;
 }
 
+.boxText {
+  font-size: 0.8rem;
+}
+
 .boxImage,
 .boxPlaceholder {
   width: 100%;

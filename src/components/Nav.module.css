@@ -1,5 +1,15 @@
-.segmentedControl {
-  position: fixed;
+.navArea {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: red;
+  z-index: 10000;
+}
+
+.nav {
+  position: sticky;
   bottom: 0;
   left: 0;
   width: 100%;
@@ -8,6 +18,7 @@
   align-items: center;
   z-index: 10000;
   border-top: solid 1px rgb(230, 230, 230);
+  background: white;
 }
 
 .tabButton {

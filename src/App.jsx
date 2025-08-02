@@ -68,11 +68,15 @@ export default () => {
   }
 
   return (
-    <div className={style.app}>
-      <div className={style.wrapper}>
-        <BrowserRouter>
-          <Routes>{routes}</Routes>
-        </BrowserRouter>
+    <div className={style.field}>
+      <div className={style.app} demo="demo">
+        <div className={style.topMargin}></div>
+        <div className={style.wrapper}>
+          <BrowserRouter>
+            <Routes>{routes}</Routes>
+          </BrowserRouter>
+        </div>
+        <div className={style.bottomMargin}></div>
       </div>
     </div>
   );
