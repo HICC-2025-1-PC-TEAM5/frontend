@@ -6,6 +6,7 @@ import homeIcon from '../assets/svg/Nav/home.svg?react';
 import recipeIcon from '../assets/svg/Nav/recipe.svg?react';
 import fridgeIcon from '../assets/svg/Nav/refridge.svg?react';
 import profileIcon from '../assets/svg/Nav/mypage.svg?react';
+import Stack from './Stack';
 
 const tabs = [
   { url: '/', label: '홈', Icon: homeIcon },
@@ -16,19 +17,25 @@ const tabs = [
 
 export default () => {
   return (
-    <div className={styles.nav}>
+    <Stack
+      className={styles.nav}
+      justify="space-between"
+      align="center"
+      gap="none"
+      fill="width"
+    >
       {tabs.map(({ label, Icon, url }) => (
         <NavLink
           key={url}
           to={url}
           className={({ isActive }) =>
-            `${styles.tabButton} ${isActive ? styles.active : ''}`
+            `${styles.button} ${isActive ? styles.active : ''}`
           }
         >
           <Icon className={styles.icon} />
           <span className={styles.label}>{label}</span>
         </NavLink>
       ))}
-    </div>
+    </Stack>
   );
 };

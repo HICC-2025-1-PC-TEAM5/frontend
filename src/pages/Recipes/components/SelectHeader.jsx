@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import styles from './SelectHeader.module.css';
+import Stack from '../../../components/Stack';
+import { NavLink, useLocation } from 'react-router';
 
 import IconA from '../../../assets/svg/Recipe/iconA.svg?react';
 import IconB from '../../../assets/svg/Recipe/iconB.svg?react';
@@ -9,31 +11,43 @@ import IconE from '../../../assets/svg/Recipe/iconE.svg?react';
 import IconF from '../../../assets/svg/Recipe/iconF.svg?react';
 
 const tabs = [
-  { id: 'a', label: '전체', Icon: IconA },
-  { id: 'b', label: '15분 이내', Icon: IconB },
-  { id: 'c', label: '든든 한끼', Icon: IconC },
-  { id: 'd', label: '건강 식단', Icon: IconD },
-  { id: 'e', label: '재료 털기', Icon: IconE },
-  { id: 'f', label: '간식 안주', Icon: IconF },
+  { id: 'all', label: '모든 레시피', Icon: IconA },
+  { id: 'c', label: '든든한 한끼', Icon: IconC },
+  { id: 'd', label: '건강한 식단', Icon: IconD },
+  { id: 'e', label: '남은 재료 털기', Icon: IconE },
+  { id: 'f', label: '맛있는 간식', Icon: IconF },
 ];
 
 export default function SelectHeader() {
-  const [selected, setSelected] = useState('a');
+  const location = useLocation();
 
   return (
-    <div className={styles.segmentedControl}>
-      {tabs.map(({ id, label, Icon }) => (
-        <button
+    <Stack
+      className={styles.nav}
+      justify="start"
+      align="center"
+      gap="wide"
+      fill="width"
+    >
+      {tabs.map(({ label, Icon, id }) => (
+        <NavLink
           key={id}
-          className={`${styles.tabButton} ${
-            selected === id ? styles.active : ''
-          }`}
-          onClick={() => setSelected(id)}
+          to={id !== 'all' ? `?category=${id}` : ''}
+          className={() => {
+            const category = new URLSearchParams(location.search).get(
+              'category'
+            );
+            let className = `${styles.button}`;
+            if (category === id || (!location.search && id === 'all')) {
+              className += ` ${styles.active}`;
+            }
+            return className;
+          }}
         >
           <Icon className={styles.icon} />
           <span className={styles.label}>{label}</span>
-        </button>
+        </NavLink>
       ))}
-    </div>
+    </Stack>
   );
 }

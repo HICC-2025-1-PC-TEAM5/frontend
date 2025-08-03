@@ -17,6 +17,8 @@ export default function Main({ username = '홍길동' }) {
     { id: 2, imageSrc: '', title: '요리2', desc: 'large' },
     { id: 3, imageSrc: '', title: '요리3', desc: 'large' },
     { id: 4, imageSrc: '', title: '요리4', desc: 'large' },
+    { id: 5, imageSrc: '', title: '요리5', desc: 'large' },
+    { id: 6, imageSrc: '', title: '요리6', desc: 'large' },
   ];
 
   const handleCardClick = (id) => {
@@ -27,7 +29,7 @@ export default function Main({ username = '홍길동' }) {
     <>
       <div className={styles.header}>
         <Wrapper>
-          <Stack>
+          <Stack gap="narrow">
             <LogoIcon className={styles.logoIcon} />
             <h1 className={styles.logoTitle}>오늘도 썩는 중</h1>
           </Stack>
@@ -63,8 +65,8 @@ export default function Main({ username = '홍길동' }) {
 
       <div className={styles.popular}>
         <Wrapper>
-          <h3 className={styles.recommendTitle}>요즘 많이 찾는 레시피</h3>
-          <Stack rows="3" wrap="wrap">
+          <h3 className={styles.recommendTitle}>인기 레시피</h3>
+          <Stack rows="2" wrap="wrap">
             {imageData.map((item) => (
               <div key={item.id} onClick={() => handleCardClick(item.id)}>
                 <ImageCard
