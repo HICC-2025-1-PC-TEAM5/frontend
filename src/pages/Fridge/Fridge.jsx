@@ -1,105 +1,51 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import './Fridge.css';
+import Button from '../../components/Button';
 import Nav from '../../components/Nav';
-import Stack from '../../components/Stack';
-import ImageCard from '../../components/ImageCard';
 import ImageCoin from '../../components/ImageCoin';
+import CategorySelect from './components/CategorySelect';
+import styles from './Fridge.module.css';
 
-export default function () {
+export default function Fridge() {
+  const suggestionItems = [
+    { id: 1, imageSrc: '', text: '굴소스' },
+    { id: 2, imageSrc: '', text: '액젓' },
+    { id: 3, imageSrc: '', text: '면' },
+    { id: 4, imageSrc: '', text: '숙주' },
+  ];
+
   return (
     <>
-      <div className="header">
-        <div className="outwrapper">
-          <div className="inwrapper">
-            <h1>냉장고</h1>
-          </div>
+      <div className={styles.header}>
+        <h1 className={styles.title}>식재료 관리</h1>
+        <div className={styles.buttonGroup}>
+          <Button variant="default">재료 추가</Button>
+          <Button variant="default">재료 수정</Button>
         </div>
       </div>
 
-      <div className="index">
-        <div className="nav">
-          <div className="filter">
-            <div className="outwrapper">
-              <div className="inwrapper">
-                <Stack className="stack" align="center">
-                  <div className="button">전체 27</div>
-                  <div className="button selected">냉장보관 14</div>
-                  <div className="button">냉동보관 5</div>
-                  <div className="button">실온보관 39</div>
-                </Stack>
-              </div>
-            </div>
-          </div>
-
-          <div className="category">
-            <div className="outwrapper">
-              <div className="inwrapper">
-                <Stack className="stack" align="center">
-                  <div className="button">전체</div>
-                  <div className="button selected">채소</div>
-                  <div className="button">과일</div>
-                  <div className="button">고기 · 해산물</div>
-                  <div className="button">계란 · 유제품</div>
-                  <div className="button">양념 · 조미료</div>
-                </Stack>
-              </div>
-            </div>
-          </div>
-
-          <div className="sort">
-            <div className="outwrapper">
-              <div className="inwrapper">
-                <Stack className="stack" justify="space-between">
-                  <div className="count">재료 6개</div>
-                  <div className="select">최신순</div>
-                </Stack>
-              </div>
-            </div>
-          </div>
+      <div className={styles.recommands}>
+        <div className={styles.message}>
+          <p>이 재료들을 구비해보는 건 어떨까요?</p>
         </div>
 
-        <div className="list">
-          <div className="outwrapper">
-            <div className="inwrapper">
-              <Stack className="stack" wrap="wrap" rows="3">
-                <ImageCard></ImageCard>
-                <ImageCard></ImageCard>
-                <ImageCard></ImageCard>
-                <ImageCard></ImageCard>
-                <ImageCard></ImageCard>
-                <ImageCard></ImageCard>
-              </Stack>
-            </div>
-          </div>
+        <div className={styles.imageList}>
+          {suggestionItems.map((item) => (
+            <ImageCoin
+              key={item.id}
+              imageSrc={item.imageSrc}
+              text={item.text}
+              variant="medium"
+            />
+          ))}
         </div>
+
+        <Button variant="default" className={styles.actionButton}>
+          조금만 넣어도 깊은 맛이 확 살아나요
+        </Button>
       </div>
-
-      <div className="recommands">
-        <div className="message">
-          <div className="outwrapper">
-            <div className="inwrapper">
-              <p>이 재료들은 구비하는 게 어떨가요?</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="list">
-          <div className="outwrapper">
-            <div className="inwrapper">
-              <Stack className="stack" wrap="wrap">
-                <ImageCoin></ImageCoin>
-                <ImageCoin></ImageCoin>
-                <ImageCoin></ImageCoin>
-                <ImageCoin></ImageCoin>
-                <ImageCoin></ImageCoin>
-                <ImageCoin></ImageCoin>
-              </Stack>
-            </div>
-          </div>
-        </div>
-      </div>
-      <Nav></Nav>
+      <CategorySelect />
+      <Nav />
     </>
   );
 }

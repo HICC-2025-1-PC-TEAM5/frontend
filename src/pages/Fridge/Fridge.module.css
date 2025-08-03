@@ -1,10 +1,28 @@
 .header {
-  padding-top: 3rem;
-  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem;
 }
-.header h1 {
+.title {
   font-weight: bold;
   font-size: 1.5rem;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 1rem;
+}
+
+.imageList {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap; /* 화면 줄어들면 줄바꿈 */
+}
+
+.actionButton {
+  margin-top: 1.5rem;
+  font-size: 1rem;
 }
 
 .index {
