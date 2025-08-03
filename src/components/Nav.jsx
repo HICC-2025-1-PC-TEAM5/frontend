@@ -16,7 +16,7 @@ const tabs = [
 
 export default () => {
   return (
-    <div className={styles.segmentedControl}>
+    <div className={styles.nav}>
       {tabs.map(({ label, Icon, url }) => (
         <NavLink
           key={url}

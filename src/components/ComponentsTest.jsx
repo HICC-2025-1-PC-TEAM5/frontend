@@ -61,13 +61,54 @@ export default () => {
       <br />
 
       <Stack>
-        <Button
-          icon="only"
-          onClick={() => {
-            console.log(5);
-          }}
-        >
-          a
+        <Button icon="only">
+          <span icon="icon">🥺</span>
+        </Button>
+        <Button icon="left">
+          <span icon>🥺</span>
+          버튼 문구
+        </Button>
+        <Button icon="right">
+          버튼 문구
+          <span icon>🥺</span>
+        </Button>
+        <Button icon="only" border="round">
+          <span icon>🥺</span>
+        </Button>
+        <Button icon="left" border="round">
+          <span icon>🥺</span>
+          버튼 문구
+        </Button>
+        <Button icon="right" border="round">
+          버튼 문구
+          <span icon>🥺</span>
+        </Button>
+      </Stack>
+
+      <br />
+
+      <Stack>
+        <Button icon="only" size="small">
+          <span icon>🥺</span>
+        </Button>
+        <Button icon="left" size="small">
+          <span icon>🥺</span>
+          버튼 문구
+        </Button>
+        <Button icon="right" size="small">
+          버튼 문구
+          <span icon>🥺</span>
+        </Button>
+        <Button icon="only" size="small" border="round">
+          <span icon>🥺</span>
+        </Button>
+        <Button icon="left" size="small" border="round">
+          <span icon>🥺</span>
+          버튼 문구
+        </Button>
+        <Button icon="right" size="small" border="round">
+          버튼 문구
+          <span icon>🥺</span>
         </Button>
       </Stack>
     </>

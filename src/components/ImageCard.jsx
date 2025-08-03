@@ -1,10 +1,12 @@
 import styles from './ImageCard.module.css';
+import Stack from './Stack';
 
-function ImageCard({ imageSrc, text, variant = 'small' }) {
+function ImageCard(props) {
+  const { imageSrc, title, text, variant = 'small', desc } = props;
   const variantClass = styles[`card-${variant}`];
 
   return (
-    <div className={`${styles.card} ${variantClass}`}>
+    <Stack className={styles.card} direction="vertical" gap="none">
       <div className={styles.imageWrapper}>
         {imageSrc ? (
           <img src={imageSrc} alt={text} className={styles.image} />
@@ -12,8 +14,11 @@ function ImageCard({ imageSrc, text, variant = 'small' }) {
           <div className={styles.placeholder}></div>
         )}
       </div>
-      <p className={styles.text}>{text}</p>
-    </div>
+      <div className={styles.textWrapper}>
+        <p className={styles.title}>{title || text}</p>
+        {desc ? <p className={styles.desc}>{desc}</p> : null}
+      </div>
+    </Stack>
   );
 }
 

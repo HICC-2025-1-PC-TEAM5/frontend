@@ -1,6 +1,16 @@
 .stack {
   display: flex;
 }
+.stack[fill='width'] {
+  width: 100%;
+}
+.stack[fill='height'] {
+  height: 100%;
+}
+.stack[fill='all'] {
+  width: 100%;
+  height: 100%;
+}
 .stack[direction='horizontal'] {
   flex-direction: row;
 }
@@ -28,9 +38,31 @@
 .stack[align='center'] {
   align-items: center;
 }
+.stack[gap='none'] {
+  gap: 0rem;
+}
+.stack[gap='narrow'] {
+  gap: 0.5rem;
+}
 .stack[gap='normal'] {
   gap: 1rem;
 }
 .stack[wrap='wrap'] {
   flex-wrap: wrap;
+}
+
+.stack[rows='1'] > * {
+  width: 100%;
+}
+.stack[rows='2'] > * {
+  width: calc((100% - 1rem) / 2);
+}
+.stack[rows='3'] > * {
+  width: calc((100% - 2rem) / 3);
+}
+.stack[rows='4'] > * {
+  width: calc((100% - 3rem) / 4);
+}
+.stack[rows='5'] > * {
+  width: calc((100% - 4rem) / 5);
 }

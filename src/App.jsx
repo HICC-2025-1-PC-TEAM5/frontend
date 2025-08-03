@@ -6,7 +6,6 @@ import AuthLogin from './pages/Auth/AuthLogin';
 import RecipesRouter from './pages/Recipes/RecipesRouter';
 import FridgeRouter from './pages/Fridge/FridgeRouter';
 import ProfileRouter from './pages/Profile/ProfileRouter';
-import SettingsRouter from './pages/Settings/SettingsRouter';
 
 import style from './App.module.css';
 import ComponentsTest from './components/ComponentsTest';
@@ -53,7 +52,6 @@ export default () => {
         <Route path="recipes/*" element={<RecipesRouter />} />
         <Route path="fridge/*" element={<FridgeRouter />} />
         <Route path="profile/*" element={<ProfileRouter />} />
-        <Route path="settings/*" element={<SettingsRouter />} />
         <Route path="test/components" element={<ComponentsTest />} />
       </>
     );
@@ -68,11 +66,15 @@ export default () => {
   }
 
   return (
-    <div className={style.app}>
-      <div className={style.wrapper}>
-        <BrowserRouter>
-          <Routes>{routes}</Routes>
-        </BrowserRouter>
+    <div className={style.field}>
+      <div className={style.app} dem="demo">
+        <div className={style.topMargin}></div>
+        <div className={style.wrapper}>
+          <BrowserRouter>
+            <Routes>{routes}</Routes>
+          </BrowserRouter>
+        </div>
+        <div className={style.bottomMargin}></div>
       </div>
     </div>
   );

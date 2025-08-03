@@ -95,9 +95,7 @@ button [iconwrapper] {
   justify-content: center;
   align-items: center;
 }
-button [icon],
-[type='button'] [icon],
-wn-button [icon] {
+button [icon] {
   position: relative;
   vertical-align: baseline;
   display: inline-flex;
