@@ -1,7 +1,13 @@
-export default function TextInput(props) {
+import styles from './Wrapper.module.css';
+
+export default (props) => {
+  const { fill } = props;
+
   return (
-    <div className="outwrapper">
-      <div className="inwrapper">{props.children}</div>
+    <div className={styles.outwrapper} fill={fill}>
+      <div className={styles.inwrapper} fill={fill}>
+        {props.children}
+      </div>
     </div>
   );
-}
+};

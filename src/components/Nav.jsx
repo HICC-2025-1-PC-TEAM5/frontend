@@ -18,29 +18,32 @@ const tabs = [
 
 export default () => {
   return (
-    <nav className={styles.nav}>
-      <Wrapper className={styles.navWrapper}>
-        <Stack
-          className={styles.navStack}
-          justify="space-between"
-          align="center"
-          gap="none"
-          fill="width"
-        >
-          {tabs.map(({ label, Icon, url }) => (
-            <NavLink
-              key={url}
-              to={url}
-              className={({ isActive }) =>
-                `${styles.button} ${isActive ? styles.active : ''}`
-              }
-            >
-              <Icon className={styles.icon} />
-              <span className={styles.label}>{label}</span>
-            </NavLink>
-          ))}
-        </Stack>
-      </Wrapper>
-    </nav>
+    <>
+      <nav className={styles.nav}>
+        <Wrapper className={styles.navWrapper}>
+          <Stack
+            className={styles.navStack}
+            justify="space-between"
+            align="center"
+            gap="none"
+            fill="width"
+          >
+            {tabs.map(({ label, Icon, url }) => (
+              <NavLink
+                key={url}
+                to={url}
+                className={({ isActive }) =>
+                  `${styles.button} ${isActive ? styles.active : ''}`
+                }
+              >
+                <Icon className={styles.icon} />
+                <span className={styles.label}>{label}</span>
+              </NavLink>
+            ))}
+          </Stack>
+        </Wrapper>
+      </nav>
+      <div className={styles.navMargin}></div>
+    </>
   );
 };

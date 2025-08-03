@@ -135,13 +135,19 @@ a:active {
   text-decoration: none;
 }
 
-.outwrapper {
-  margin: 0 auto;
-  padding: 0 1rem;
+h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
 }
-.outwrapper[content] {
-  max-width: 46rem;
+h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
 }
-.outwrapper[form] {
-  max-width: 24rem;
+h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+h4 {
+  font-size: 1rem;
+  font-weight: 600;
 }

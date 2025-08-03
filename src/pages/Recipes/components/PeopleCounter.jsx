@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import styles from './PeopleCounter.module.css';
 import Button from '../../../components/Button';
+import Stack from '../../../components/Stack';
 
 export default function PeopleCounter({
   min = 1,
@@ -18,17 +19,22 @@ export default function PeopleCounter({
   };
 
   return (
-    <div className={styles.container}>
+    <Stack justify="space-between" align="center" fill="all">
       <div className={styles.people}>
         <Button
-          variant="default"
+          size="small"
+          border="round"
           onClick={() => handleChange(count - 1)}
           disabled={count === min}
         >
           -
         </Button>
         <span className={styles.count}>{count} 인분</span>
-        <Button variant="default" onClick={() => handleChange(count + 1)}>
+        <Button
+          size="small"
+          border="round"
+          onClick={() => handleChange(count + 1)}
+        >
           +
         </Button>
       </div>
@@ -36,6 +42,6 @@ export default function PeopleCounter({
       <Button variant="primary" onClick={onStartCooking}>
         조리시작
       </Button>
-    </div>
+    </Stack>
   );
 }
