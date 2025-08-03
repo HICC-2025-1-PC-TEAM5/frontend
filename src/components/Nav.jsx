@@ -7,6 +7,7 @@ import recipeIcon from '../assets/svg/Nav/recipe.svg?react';
 import fridgeIcon from '../assets/svg/Nav/refridge.svg?react';
 import profileIcon from '../assets/svg/Nav/mypage.svg?react';
 import Stack from './Stack';
+import Wrapper from './Wrapper';
 
 const tabs = [
   { url: '/', label: '홈', Icon: homeIcon },
@@ -17,25 +18,29 @@ const tabs = [
 
 export default () => {
   return (
-    <Stack
-      className={styles.nav}
-      justify="space-between"
-      align="center"
-      gap="none"
-      fill="width"
-    >
-      {tabs.map(({ label, Icon, url }) => (
-        <NavLink
-          key={url}
-          to={url}
-          className={({ isActive }) =>
-            `${styles.button} ${isActive ? styles.active : ''}`
-          }
+    <nav className={styles.nav}>
+      <Wrapper className={styles.navWrapper}>
+        <Stack
+          className={styles.navStack}
+          justify="space-between"
+          align="center"
+          gap="none"
+          fill="width"
         >
-          <Icon className={styles.icon} />
-          <span className={styles.label}>{label}</span>
-        </NavLink>
-      ))}
-    </Stack>
+          {tabs.map(({ label, Icon, url }) => (
+            <NavLink
+              key={url}
+              to={url}
+              className={({ isActive }) =>
+                `${styles.button} ${isActive ? styles.active : ''}`
+              }
+            >
+              <Icon className={styles.icon} />
+              <span className={styles.label}>{label}</span>
+            </NavLink>
+          ))}
+        </Stack>
+      </Wrapper>
+    </nav>
   );
 };
