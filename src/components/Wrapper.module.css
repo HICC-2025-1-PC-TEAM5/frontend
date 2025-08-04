@@ -1,0 +1,21 @@
+.outwrapper {
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+.outwrapper[content] {
+  max-width: 46rem;
+}
+.outwrapper[form] {
+  max-width: 24rem;
+}
+
+.inwrapper {
+  width: 100%;
+}
+
+.outwrapper[fill='height'] {
+  height: 100%;
+}
+.inwrapper[fill='height'] {
+  height: 100%;
+}

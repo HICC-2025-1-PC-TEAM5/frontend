@@ -4,6 +4,10 @@ import TimeIcon from '../../../assets/svg/Recipe/time.svg?react';
 import PeopleIcon from '../../../assets/svg/Recipe/people.svg?react';
 import UsageIcon from '../../../assets/svg/Recipe/people.svg?react';
 import DifficultyIcon from '../../../assets/svg/Recipe/people.svg?react';
+import Wrapper from '../../../components/Wrapper';
+import Stack from '../../../components/Stack';
+import Button from '../../../components/Button';
+import Stars from '../../../components/Stars';
 
 function RecipeInfo({
   imageSrc = '',
@@ -13,37 +17,42 @@ function RecipeInfo({
   people = '1-2인분',
 }) {
   return (
-    <div className={styles.container}>
-      {imageSrc ? (
-        <img src={imageSrc} alt={name} className={styles.image} />
-      ) : (
-        <div className={styles.placeholder}></div>
-      )}
-      <div className={styles.header}>
-        <h2 className={styles.name}>{name}</h2>
-        <div className={styles.meta}>
+    <>
+      <div className={styles.image}>
+        {imageSrc ? (
+          <img src={imageSrc} alt={name} className={styles.image} />
+        ) : (
+          <div className={styles.placeholder}></div>
+        )}
+      </div>
+
+      <div className={styles.info}>
+        <Stack className={styles.title} justify="space-between" align="center">
+          <h2>{name}</h2>
+          <Button variant="none" size="small">
+            저장
+          </Button>
+        </Stack>
+
+        <div className={styles.desc}>
+          <p>{description}</p>
+        </div>
+
+        {/*<div className={styles.meta}>
           <TimeIcon className={styles.icon} />
           <span>{time}</span>
           <PeopleIcon className={styles.icon} />
           <span>{people}</span>
-        </div>
-        <button className={styles.saveBtn}>저장</button>
-      </div>
+        </div>*/}
 
-      <p className={styles.description}>{description}</p>
-
-      {/* 활용도 & 난이도 */}
-      <div className={styles.tags}>
-        <div className={styles.tag}>
-          <UsageIcon className={styles.tagIcon} />
-          <span>재료 활용도</span>
-        </div>
-        <div className={styles.tag}>
-          <DifficultyIcon className={styles.tagIcon} />
-          <span>난이도</span>
+        <div className={styles.levels}>
+          <Stack>
+            <Stars level="5" text="재료 활용도"></Stars>
+            <Stars level="2" text="난이도"></Stars>
+          </Stack>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

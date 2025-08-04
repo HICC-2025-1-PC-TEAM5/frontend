@@ -1,35 +1,38 @@
-.segmentedControl {
-  display: flex;
-  gap: 1rem;
+.nav {
+  overflow-y: auto;
 }
-
-.tabButton {
+.button {
   display: flex;
   flex-direction: column;
+  justify-content: start;
   align-items: center;
   background: none;
   border: none;
   cursor: pointer;
-  color: #6e7781; /* 기본 회색 */
+  color: var(--color-tone-8);
   font-size: 0.75rem;
+  min-width: max-content;
+  padding-bottom: 0.5rem;
+  border-bottom: solid 0.1rem transparent;
+}
+.button.active {
+  color: var(--color-tone-13);
+  border-bottom: solid 0.1rem var(--color-tone-13);
+}
+.button:focus {
+  outline: none;
 }
 
 .icon {
-  width: 24px;
-  height: 24px;
-  margin-bottom: 4px;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-bottom: 0.4rem;
   stroke: currentColor;
-  fill: none; /* 아이콘 색상 글자색과 연동 */
+  fill: none;
 }
-
 .label {
-  font-size: 12px;
-}
-
-.tabButton.active {
-  color: #000; /* 선택 시 검정 */
-}
-
-.tabButton:focus {
-  outline: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  height: 0.8rem;
+  margin-bottom: 0.1rem;
 }

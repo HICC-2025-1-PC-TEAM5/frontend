@@ -12,35 +12,42 @@
   width: 100%;
   aspect-ratio: 16/9;
   object-fit: cover;
-  border-radius: 8px;
-  background: #f0f0f0;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  background: var(--color-tone-3);
+  margin-bottom: 1.5rem;
 }
-
 .placeholder {
   width: 100%;
-  aspect-ratio: 16/9;
-  border-radius: 8px;
-  background: #e0e0e0;
-}
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  height: 100%;
 }
 
+.title {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
 .name {
   font-size: 1.25rem;
-  font-weight: bold;
-  color: #111;
-  flex: 1;
+  font-weight: 600;
+}
+
+.desc {
+  margin-top: 0.75rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--color-tone-10);
 }
 
 .meta {
+  margin-top: 1.5rem;
   display: flex;
   align-items: center;
   gap: 4px;
   font-size: 0.9rem;
   color: #333;
+}
+.levels {
+  margin-bottom: 1.5rem;
 }
 
 .icon {

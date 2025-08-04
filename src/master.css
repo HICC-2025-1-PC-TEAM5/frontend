@@ -6,41 +6,22 @@ html {
 
 :root {
   --color-tone-0: white;
-  --color-tone-1: hsl(22 20% 95%);
-  --color-tone-2: hsl(22 15% 90%);
-  --color-tone-3: hsl(22 10% 85%);
-  --color-tone-4: hsl(22 7% 80%);
-  --color-tone-5: hsl(22 7% 75%);
-  --color-tone-6: hsl(22 7% 70%);
-  --color-tone-7: hsl(22 7% 65%);
-  --color-tone-8: hsl(22 5% 60%);
-  --color-tone-9: hsl(22 5% 55%);
-  --color-tone-10: hsl(22 5% 50%);
-  --color-tone-11: hsl(22 5% 40%);
-  --color-tone-12: hsl(22 10% 30%);
-  --color-tone-13: hsl(22 10% 20%);
-  --color-tone-14: hsl(22 10% 10%);
+  --color-tone-1: rgb(245, 245, 245);
+  --color-tone-1-tp: rgb(245, 245, 245, 0);
+  --color-tone-2: rgb(230, 230, 230);
+  --color-tone-3: rgb(215, 215, 215);
+  --color-tone-4: rgb(205, 205, 205);
+  --color-tone-5: rgb(190, 190, 190);
+  --color-tone-6: rgb(180, 180, 180);
+  --color-tone-7: rgb(160, 160, 160);
+  --color-tone-8: rgb(150, 150, 150);
+  --color-tone-9: rgb(137, 137, 137);
+  --color-tone-10: rgb(128, 128, 128);
+  --color-tone-11: rgb(100, 100, 100);
+  --color-tone-12: rgb(75, 75, 75);
+  --color-tone-13: rgb(40, 40, 40);
+  --color-tone-14: rgb(20, 20, 20);
   --color-tone-15: black;
-
-  --color-logo: rgb(108, 136, 63);
-
-  --color-tone-0: white;
-  --color-tone-1: hsl(245, 20%, 95%);
-  --color-tone-2: hsl(245 15% 90%);
-  --color-tone-3: hsl(245 10% 85%);
-  --color-tone-4: hsl(245 7% 80%);
-  --color-tone-5: hsl(245 7% 75%);
-  --color-tone-6: hsl(245, 7%, 70%);
-  --color-tone-7: hsl(245 7% 65%);
-  --color-tone-8: hsl(245 5% 60%);
-  --color-tone-9: hsl(245 5% 55%);
-  --color-tone-10: hsl(245 5% 50%);
-  --color-tone-11: hsl(245 5% 40%);
-  --color-tone-12: hsl(245 10% 30%);
-  --color-tone-13: hsl(245 10% 20%);
-  --color-tone-14: hsl(245 10% 10%);
-  --color-tone-15: black;
-  --color-logo: rgb(67, 141, 78);
 
   --th: #d2b0dd;
 
@@ -154,13 +135,19 @@ a:active {
   text-decoration: none;
 }
 
-.outwrapper {
-  margin: 0 auto;
-  padding: 0 1rem;
+h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
 }
-.outwrapper[content] {
-  max-width: 46rem;
+h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
 }
-.outwrapper[form] {
-  max-width: 24rem;
+h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+h4 {
+  font-size: 1rem;
+  font-weight: 600;
 }
