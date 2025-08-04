@@ -77,3 +77,11 @@
 .recommands .message p {
   font-weight: bold;
 }
+
+.ingredients {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+.ingredientsIndex > a {
+  display: block;
+}

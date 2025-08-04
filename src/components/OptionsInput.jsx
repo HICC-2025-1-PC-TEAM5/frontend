@@ -1,4 +1,4 @@
-import './OptionsInput.css';
+import './OptionsInput.module.css';
 
 export default function (props) {
   const { type = 'text', placeholder, label, message, error } = props;
