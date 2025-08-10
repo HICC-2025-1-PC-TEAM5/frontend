@@ -1,0 +1,27 @@
+.searchWrap {
+  position: relative;
+  width: 100%;
+}
+.searchBar {
+  background: #f5f5f5;
+  color: #000;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.iconButton {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  line-height: 0;
+  cursor: pointer;
+}
+
+.icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}

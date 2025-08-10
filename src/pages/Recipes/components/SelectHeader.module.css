@@ -1,5 +1,6 @@
 .nav {
   overflow-y: auto;
+  gap: 2.3rem;
 }
 .button {
   display: flex;
@@ -24,8 +25,8 @@
 }
 
 .icon {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 2.25rem;
+  height: 2.25rem;
   margin-bottom: 0.4rem;
   stroke: currentColor;
   fill: none;

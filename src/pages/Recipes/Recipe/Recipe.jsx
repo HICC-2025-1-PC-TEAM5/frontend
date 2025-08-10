@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import styles from './Recipe.module.css';
 import RecipeInfo from '../components/RecipeInfo';
@@ -6,6 +7,8 @@ import Button from '../../../components/Button';
 import PeopleCounter from '../components/PeopleCounter';
 import Wrapper from '../../../components/Wrapper';
 import Stack from '../../../components/Stack';
+import CookingStep from '../components/CookingStep';
+import { useParams } from 'react-router';
 
 const ingredientsNo = [
   { id: 1, imageSrc: '', text: '이름', variant: 'medium' },
@@ -20,10 +23,17 @@ const ingredientsYes = [
 ];
 
 function Recipe() {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const handleBack = () => {
-    navigate(-1);
-  };
+  const handleBack = () => navigate(-1);
+
+  const [showSteps, setShowSteps] = useState(false);
+
+  const steps = [
+    { step: 1, title: '재료 손질', desc: '야채를 깨끗이 씻고 손질하세요.' },
+    { step: 2, title: '볶기', desc: '중불에서 5분간 볶으세요.' },
+    { step: 3, title: '마무리', desc: '간을 하고 불을 끕니다.' },
+  ];
 
   return (
     <>
@@ -51,14 +61,13 @@ function Recipe() {
 
       <div className={styles.recipe}>
         <Wrapper>
-          <RecipeInfo />
+          <RecipeInfo id={id} />
         </Wrapper>
       </div>
 
       <div className={styles.ingredients}>
         <Wrapper>
           <h2>재료</h2>
-
           <h4>없어요</h4>
           <Stack>
             {ingredientsNo.map((item) => (
@@ -83,7 +92,42 @@ function Recipe() {
         </Wrapper>
       </div>
 
-      {/*<div className={styles.tools}>
+      {!showSteps ? (
+        // showSteps === false → PeopleCounter + 조리시작 버튼
+        <div className={styles.control}>
+          <Wrapper fill="height">
+            <PeopleCounter />
+            <Button variant="primary" onClick={() => setShowSteps(true)}>
+              조리시작
+            </Button>
+          </Wrapper>
+        </div>
+      ) : (
+        // showSteps === true → CookingStep + 조리완료 버튼
+        <div className={styles.steps}>
+          <Wrapper>
+            {steps.map((s) => (
+              <CookingStep
+                key={s.step}
+                stepNumber={s.step}
+                title={s.title}
+                description={s.desc}
+              />
+            ))}
+            <Button variant="primary">조리완료</Button>
+          </Wrapper>
+        </div>
+      )}
+
+      <div className={styles.controlMargin}></div>
+    </>
+  );
+}
+
+export default Recipe;
+
+{
+  /*<div className={styles.tools}>
         <Wrapper>
           <h2>조리도구</h2>
           <Stack gap="narrow">
@@ -98,16 +142,5 @@ function Recipe() {
             </Button>
           </Stack>
         </Wrapper>
-      </div>*/}
-
-      <div className={styles.control}>
-        <Wrapper fill="height">
-          <PeopleCounter />
-        </Wrapper>
-      </div>
-      <div className={styles.controlMargin}></div>
-    </>
-  );
+      </div>*/
 }
-
-export default Recipe;

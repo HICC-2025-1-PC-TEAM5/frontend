@@ -9,6 +9,8 @@ import CategorySelect from './components/CategorySelect';
 import Wrapper from '../../components/Wrapper';
 import Stack from '../../components/Stack';
 import styles from './Fridge.module.css';
+import PencilIcon from '../../assets/svg/Fridge/Pencil.svg?react';
+import PlusIcon from '../../assets/svg/Fridge/Plus.svg?react';
 
 export default function Fridge() {
   const navigate = useNavigate();
@@ -48,8 +50,23 @@ export default function Fridge() {
       <div className={styles.header}>
         <h1 className={styles.title}>식재료 관리</h1>
         <div className={styles.buttonGroup}>
-          <Button variant="default">재료 추가</Button>
-          <Button variant="default">재료 수정</Button>
+          <Button
+            variant="invisible"
+            className={styles.iconBtn}
+            onClick={() => navigate('/fridge/ingredients/add')}
+          >
+            <span className={styles.icon}>
+              <PlusIcon />
+            </span>
+            <span className={styles.iconLabel}>재료 추가</span>
+          </Button>
+
+          <Button variant="invisible" className={styles.iconBtn}>
+            <span className={styles.icon}>
+              <PencilIcon />
+            </span>
+            <span className={styles.iconLabel}>재료 수정</span>
+          </Button>
         </div>
       </div>
 
@@ -75,12 +92,7 @@ export default function Fridge() {
       <CategorySelect />
 
       <div className={styles.sort}>
-        <OptionsInput
-          label="정렬 기준"
-          message=""
-          error=""
-          onChange={handleSortChange}
-        >
+        <OptionsInput message="" error="" onChange={handleSortChange}>
           <option value="latest">최신순</option>
           <option value="oldest">오래된순</option>
           <option value="expire">유통기한순</option>
@@ -91,7 +103,7 @@ export default function Fridge() {
         <Wrapper>
           <Stack className={styles.ingredientsIndex} rows="2" wrap="wrap">
             {items.map((item) => (
-              <Link key={item.id} to={`/ingredients/${item.id}`}>
+              <Link key={item.id} to={`/fridge/ingredients/${item.id}`}>
                 <ImageCard
                   imageSrc={item.imageSrc}
                   title={item.title}

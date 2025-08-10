@@ -10,6 +10,9 @@ import ProfileRouter from './pages/Profile/ProfileRouter';
 import style from './App.module.css';
 import ComponentsTest from './components/ComponentsTest';
 
+// ✅ 추가: 레시피 저장 상태 전역 공유 Provider
+import { SavedRecipesProvider } from './pages/Recipes/SavedRecipesContext';
+
 /*
 
 / >> 메인
@@ -70,9 +73,12 @@ export default () => {
       <div className={style.app} dem="demo">
         <div className={style.topMargin}></div>
         <div className={style.wrapper}>
-          <BrowserRouter>
-            <Routes>{routes}</Routes>
-          </BrowserRouter>
+          {/* ✅ 여기서 전체 앱을 SavedRecipesProvider로 감싸 전역 상태 공유 */}
+          <SavedRecipesProvider>
+            <BrowserRouter>
+              <Routes>{routes}</Routes>
+            </BrowserRouter>
+          </SavedRecipesProvider>
         </div>
         <div className={style.bottomMargin}></div>
       </div>

@@ -1,6 +1,6 @@
 .card {
   position: relative;
-  background: #e0e0e0;
+  background: url('../../../assets/image/alertcard.png') no repeat center/cover;
   border-radius: 0.5rem;
   padding: 1rem;
   width: 100%;
@@ -10,9 +10,10 @@
 }
 
 .message {
-  font-size: 1rem;
-  font-weight: 500;
-  color: #000;
+  margin-top: 0.5rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
 }
 
 .linkText {
@@ -21,7 +22,7 @@
 }
 
 .customButton {
-  color: #000;
+  color: #f2f4dd;
   width: 3.5rem;
   height: 3.5rem;
   border-radius: 30rem;

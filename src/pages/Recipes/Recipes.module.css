@@ -9,6 +9,7 @@
   position: sticky;
   top: 0;
   left: 0;
+  padding-top: 2rem;
   background: var(--color-tone-1);
   z-index: 10000;
 }
@@ -30,7 +31,23 @@
   font-weight: 700;
   line-height: 1.75rem;
   padding-top: 1rem;
-  padding-bottom: 2rem;
+  padding-bottom: 0.8rem;
+}
+
+.subtitle {
+  font-size: 0.8rem;
+  fonr-weight: 600;
+  color: #9b9b9b;
+  margin-bottom: 2.4rem;
+}
+
+.toolbar {
+  padding-top: 1rem;
+}
+
+.sortBox {
+  display: flex;
+  justify-content: flex-end;
 }
 .recipes {
   padding-top: 1rem;

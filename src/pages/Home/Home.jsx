@@ -7,11 +7,17 @@ import Nav from '../../components/Nav';
 import LogoIcon from '../../assets/svg/Main/logo.svg?react';
 import SearchInput from './components/SearchInput';
 import AlertCard from './components/AlertCard';
-import ImageCoin from '../../components/ImageCoin';
 import ImageCard from '../../components/ImageCard';
+import IconC from '../../assets/svg/Recipe/iconC.svg?react';
+import IconG from '../../assets/svg/Recipe/iconG.svg?react';
+import IconD from '../../assets/svg/Recipe/iconD.svg?react';
+import IconF from '../../assets/svg/Recipe/iconF.svg?react';
+import { useUser } from '../UserContext'; // ✅ Context 불러오기
 
-export default function Main({ username = '홍길동' }) {
+export default function Main() {
+  const { username } = useUser(); // ✅ Context에서 username 가져오기
   const navigate = useNavigate();
+
   const imageData = [
     { id: 1, imageSrc: '', title: '요리1', desc: 'large' },
     { id: 2, imageSrc: '', title: '요리2', desc: 'large' },
@@ -37,7 +43,7 @@ export default function Main({ username = '홍길동' }) {
           <h1 className={styles.greeting}>
             안녕하세요 {username}님
             <br />
-            오늘은 어떤 음식을 만들어볼까요?
+            어떤 음식을 요리해볼까요
           </h1>
 
           <div className={styles.headerSearch}>
@@ -52,20 +58,39 @@ export default function Main({ username = '홍길동' }) {
 
       <div className={styles.recommands}>
         <Wrapper>
-          <h3 className={styles.recommendTitle}>레시피 추천</h3>
-          <Stack>
-            <ImageCoin imageSrc="" text="15분 이내" variant="medium" />
-            <ImageCoin imageSrc="" text="든든 한끼" variant="medium" />
-            <ImageCoin imageSrc="" text="추천3" variant="medium" />
-            <ImageCoin imageSrc="" text="추천4" variant="medium" />
-            <ImageCoin imageSrc="" text="추천5" variant="medium" />
-          </Stack>
+          <h3 className={styles.recommendTitle}>어떤 레시피를 원하시나요</h3>
+          <div className={styles.homeCoinRow}>
+            <div className={styles.homeCoin}>
+              <div className={styles.homeCoinCircle}>
+                <IconC />
+              </div>
+              <span className={styles.homeCoinText}>식사류</span>
+            </div>
+            <div className={styles.homeCoin}>
+              <div className={styles.homeCoinCircle}>
+                <IconG />
+              </div>
+              <span className={styles.homeCoinText}>국</span>
+            </div>
+            <div className={styles.homeCoin}>
+              <div className={styles.homeCoinCircle}>
+                <IconD />
+              </div>
+              <span className={styles.homeCoinText}>반찬</span>
+            </div>
+            <div className={styles.homeCoin}>
+              <div className={styles.homeCoinCircle}>
+                <IconF />
+              </div>
+              <span className={styles.homeCoinText}>간식 안주</span>
+            </div>
+          </div>
         </Wrapper>
       </div>
 
       <div className={styles.popular}>
         <Wrapper>
-          <h3 className={styles.recommendTitle}>인기 레시피</h3>
+          <h3 className={styles.recommendTitle}>요즘 많이 찾는 레시피</h3>
           <Stack rows="2" wrap="wrap">
             {imageData.map((item) => (
               <div key={item.id} onClick={() => handleCardClick(item.id)}>

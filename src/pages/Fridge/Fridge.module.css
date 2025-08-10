@@ -1,17 +1,45 @@
+.page {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 2rem;
+  align-items: flex-start;
+
+  padding: 3rem 0 0 1rem;
 }
 .title {
   font-weight: bold;
-  font-size: 1.5rem;
+  font-size: 1.75rem;
 }
 
-.buttonGroup {
+.iconBtn {
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+}
+.buttonGroup {
+  padding: 0 1rem 0 0;
+  display: flex;
+  gap: 0;
+}
+
+.icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  background: #222c3c;
+  display: grid;
+  place-items: center;
+}
+
+.iconLabel {
+  font-size: 0.75rem;
+  color: #9b9b9b;
+  white-space: nowrap;
 }
 
 .imageList {
@@ -69,7 +97,8 @@
 }
 
 .recommands {
-  margin-top: 2rem;
+  margin-top: 1rem;
+  padding: 0 0 0 1rem;
 }
 .recommands .message {
   margin-bottom: 2rem;
