@@ -4,6 +4,8 @@ import { useNavigate, useLocation } from 'react-router';
 import RecognizedSheet from '../components/RecognizedSheet';
 import Button from '../../../components/Button';
 import styles from './CameraAdd.module.css';
+import { extractIngredientsFromReceipt } from '../../../lib/fridge';
+import { addIngredients } from '../../../lib/fridge';
 
 export default function CameraAdd() {
   const navigate = useNavigate();
@@ -114,22 +116,44 @@ export default function CameraAdd() {
         ? URL.createObjectURL(blob)
         : canvas.toDataURL('image/jpeg');
 
-      // 데모 인식 결과 (thumb는 모드와 무관하게 항상 items에 포함)
-      const demo = [
-        {
+      // 기본 아이템(사진 모드): 로컬에서 바로 1개 생성
+      const baseItem = {
+        id: crypto?.randomUUID?.() || Math.random().toString(36).slice(2),
+        name: mode === 'receipt' ? '...' : '촬영한 재료',
+        qty: 1,
+        unit: '개',
+        expire: '',
+        thumb,
+      };
+
+      // 영수증 모드라면 서버에 업로드하여 인식 결과 받기
+      if (mode === 'receipt' && blob) {
+        const file = new File([blob], 'receipt.jpg', { type: 'image/jpeg' });
+
+        const userId = import.meta.env.VITE_DEV_USER_ID || '1';
+        const recognized = await extractIngredientsFromReceipt(userId, file);
+        // 서버 응답 예: [{ name, category }, ...]
+        const normalized = (recognized || []).map((it) => ({
           id: crypto?.randomUUID?.() || Math.random().toString(36).slice(2),
-          name: mode === 'receipt' ? '양파' : '양상추',
+          name: it.name,
+          category: it.category,
           qty: 1,
           unit: '개',
           expire: '',
           thumb,
-        },
-      ];
-      setItems(demo);
+        }));
+
+        // 응답 없으면 기본 아이템만, 있으면 응답으로 대체
+        setItems(normalized.length ? normalized : [baseItem]);
+      } else {
+        // 사진 모드: 기본 아이템만 추가
+        setItems([baseItem]);
+      }
+
       setSheetOpen(true);
     } catch (err) {
       console.error(err);
-      alert('사진 캡처 중 오류가 발생했어요. 한 번만 다시 시도해볼까요?');
+      alert('사진 캡처/인식 중 오류가 발생했어요. 한 번만 다시 시도해볼까요?');
     }
   };
 
@@ -137,9 +161,30 @@ export default function CameraAdd() {
 
   const handleClose = () => setSheetOpen(false);
   const handleComplete = (finalItems) => {
-    console.log('최종 등록할 재료:', finalItems);
-    // TODO: 서버 저장 로직
-    navigate(-1);
+    (async () => {
+      try {
+        const userId = localStorage.getItem('userId');
+        if (!userId) throw new Error('사용자 정보가 없습니다');
+
+        const withType = finalItems.map((it) => ({
+          ...it,
+          type: it.type || '냉장고',
+        }));
+        await addIngredients(userId, withType);
+
+        alert('재료가 등록됐어요');
+        navigate(-1);
+      } catch (err) {
+        if (err.status === 400) alert('요청 형식이 올바르지 않아요');
+        else if (err.status === 401) alert('로그인이 필요합니다');
+        else if (err.status === 403) alert('권한이 없습니다');
+        else if (err.status === 404) alert('요청 대상이 없습니다');
+        else if (err.status === 408)
+          alert('요청 시간이 초과됐습니다 다시 시도해주세요');
+        else alert(err.message || '알 수 없는 오류입니다');
+        console.error(err);
+      }
+    })();
   };
 
   return (

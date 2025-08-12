@@ -1,17 +1,39 @@
-import { createContext, useContext, useState } from 'react';
+// src/pages/UserContext.jsx
+import { createContext, useContext, useMemo, useState } from 'react';
 
-const UserContext = createContext();
+const UserContext = createContext(null);
 
 export function UserProvider({ children }) {
-  const [username, setUsername] = useState('홍길동');
+  const [user, setUser] = useState(() => {
+    const token = localStorage.getItem('token');
+    const username = localStorage.getItem('username');
+    return token ? { token, username } : null;
+  });
 
-  return (
-    <UserContext.Provider value={{ username, setUsername }}>
-      {children}
-    </UserContext.Provider>
+  const login = (token, { username }) => {
+    localStorage.setItem('token', token);
+    if (username) localStorage.setItem('username', username);
+    setUser({ token, username });
+  };
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    setUser(null);
+  };
+
+  const value = useMemo(
+    () => ({
+      user,
+      isAuthed: !!user,
+      username: user?.username ?? '사용자',
+      login,
+      logout,
+    }),
+    [user]
   );
+
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 }
 
-export function useUser() {
-  return useContext(UserContext);
-}
+export const useUser = () => useContext(UserContext);

@@ -10,14 +10,16 @@ import ProfileRouter from './pages/Profile/ProfileRouter';
 import style from './App.module.css';
 import ComponentsTest from './components/ComponentsTest';
 
-// ✅ 추가: 레시피 저장 상태 전역 공유 Provider
+// 레시피 저장 컨텍스트
 import { SavedRecipesProvider } from './pages/Recipes/SavedRecipesContext';
+// ✅ 라우트 가드
+import RequireAuth from './routes/RequireAuth';
 
 /*
 
 / >> 메인
 
-/start >> 시작하기 (회완가입)
+/start >> 시작하기 (회원가입)
 /login >> 로그인 
 
 /recipes >> 레시피 목록 (전체 카테고리)
@@ -40,43 +42,67 @@ import { SavedRecipesProvider } from './pages/Recipes/SavedRecipesContext';
 
 */
 
-const session = {
-  cookie: {
-    name: 'session',
-  },
-};
-
 export default () => {
-  let routes;
-  if (true) {
-    routes = (
-      <>
-        <Route index element={<Home />} />
-        <Route path="recipes/*" element={<RecipesRouter />} />
-        <Route path="fridge/*" element={<FridgeRouter />} />
-        <Route path="profile/*" element={<ProfileRouter />} />
-        <Route path="test/components" element={<ComponentsTest />} />
-      </>
-    );
-  } else {
-    routes = (
-      <>
-        <Route index element={<Intro />} />
-        <Route path="start" element={<AuthStart />} />
-        <Route path="login" element={<AuthLogin />} />
-      </>
-    );
-  }
-
   return (
     <div className={style.field}>
       <div className={style.app} dem="demo">
         <div className={style.topMargin}></div>
         <div className={style.wrapper}>
-          {/* ✅ 여기서 전체 앱을 SavedRecipesProvider로 감싸 전역 상태 공유 */}
           <SavedRecipesProvider>
             <BrowserRouter>
-              <Routes>{routes}</Routes>
+              <Routes>
+                {/* ✅ 공개 라우트 */}
+                <Route path="login" element={<AuthLogin />} />
+                <Route path="start" element={<AuthStart />} />
+                <Route path="intro" element={<Intro />} />
+
+                {/* ✅ 보호 라우트 */}
+                <Route
+                  index
+                  element={
+                    <RequireAuth>
+                      <Home />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="recipes/*"
+                  element={
+                    <RequireAuth>
+                      <RecipesRouter />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="fridge/*"
+                  element={
+                    <RequireAuth>
+                      <FridgeRouter />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="profile/*"
+                  element={
+                    <RequireAuth>
+                      <ProfileRouter />
+                    </RequireAuth>
+                  }
+                />
+
+                {/* 필요 시 공개 테스트 페이지 (원하면 가드로 감싸도 됨) */}
+                <Route path="test/components" element={<ComponentsTest />} />
+
+                {/* 그 외는 홈으로 유도(보호) */}
+                <Route
+                  path="*"
+                  element={
+                    <RequireAuth>
+                      <Home />
+                    </RequireAuth>
+                  }
+                />
+              </Routes>
             </BrowserRouter>
           </SavedRecipesProvider>
         </div>

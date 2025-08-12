@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router';
 import Button from '../../components/Button';
 import OptionsInput from '../../components/OptionsInput';
@@ -11,14 +11,35 @@ import Stack from '../../components/Stack';
 import styles from './Fridge.module.css';
 import PencilIcon from '../../assets/svg/Fridge/Pencil.svg?react';
 import PlusIcon from '../../assets/svg/Fridge/Plus.svg?react';
+import { getIngredients } from '../../lib/fridge';
 
 export default function Fridge() {
   const navigate = useNavigate();
   const [sortOption, setSortOption] = useState('latest');
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const userId = import.meta.env.VITE_DEV_USER_ID || '1'; // ← 세미콜론!
+        const data = await getIngredients(userId);
+        const list = (data?.refrigeratorIngredient || []).map((it) => ({
+          id: it.id,
+          imageSrc: '',
+          title: it.name,
+          desc: it.expire_date ? `유통기한 ${it.expire_date.slice(0, 10)}` : '',
+        }));
+        setItems(list);
+      } catch (e) {
+        console.error(e);
+        alert('재료 불러오기 실패');
+      }
+    })();
+  }, []);
 
   const handleSortChange = (e) => {
     setSortOption(e.target.value);
-    // 여기서 sortOption에 따라 items 정렬 로직 추가 가능
+    // TODO: sortOption에 따라 items 정렬
   };
 
   const suggestionItems = [
@@ -26,23 +47,6 @@ export default function Fridge() {
     { id: 2, imageSrc: '', text: '액젓' },
     { id: 3, imageSrc: '', text: '면' },
     { id: 4, imageSrc: '', text: '숙주' },
-  ];
-
-  // 냉장고 보관 재료 데이터
-  const items = [
-    {
-      id: 1,
-      imageSrc: '',
-      title: '두부',
-      desc: '유통기한 2025-08-10',
-    },
-    {
-      id: 2,
-      imageSrc: '',
-      title: '파',
-      desc: '유통기한 2025-08-05',
-    },
-    { id: 3, imageSrc: '', title: '계란', desc: '유통기한 2025-08-20' },
   ];
 
   return (
