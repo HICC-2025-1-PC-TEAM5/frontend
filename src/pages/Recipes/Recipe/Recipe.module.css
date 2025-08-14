@@ -1,0 +1,75 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: white;
+}
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4rem;
+  background: var(--color-tone-1);
+  z-index: 10000;
+  border-bottom: solid 1px var(--color-tone-3);
+}
+.headerSide {
+  width: 2.25rem;
+}
+.headerMain {
+  width: calc(100% - 6rem);
+}
+.headerTitle {
+  font-size: 1rem;
+  font-weight: bold;
+  justify-content: center;
+}
+.headerMargin {
+  width: 100%;
+  height: 4rem;
+  margin-bottom: 1.5rem;
+}
+
+.ingredients {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.ingredients h2 {
+  margin-bottom: 0.75rem;
+}
+.ingredients h4 {
+  margin-top: 0.75rem;
+  margin-bottom: 0.375rem;
+}
+
+.tools {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.tools h2 {
+  margin-bottom: 0.75rem;
+}
+
+.ingredientsSection {
+  padding: 16px;
+}
+
+.control {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4rem;
+  background: var(--color-tone-1);
+  border-top: solid 1px var(--color-tone-3);
+}
+.controlMargin {
+  width: 100%;
+  height: 4rem;
+}
+
+.steps {
+  padding: 1rem 0;
+}

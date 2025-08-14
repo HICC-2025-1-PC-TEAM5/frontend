@@ -1,0 +1,39 @@
+.nav {
+  overflow-y: auto;
+  gap: 2.3rem;
+}
+.button {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-tone-8);
+  font-size: 0.75rem;
+  min-width: max-content;
+  padding-bottom: 0.5rem;
+  border-bottom: solid 0.1rem transparent;
+}
+.button.active {
+  color: var(--color-tone-13);
+  border-bottom: solid 0.1rem var(--color-tone-13);
+}
+.button:focus {
+  outline: none;
+}
+
+.icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  margin-bottom: 0.4rem;
+  stroke: currentColor;
+  fill: none;
+}
+.label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  height: 0.8rem;
+  margin-bottom: 0.1rem;
+}

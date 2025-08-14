@@ -1,0 +1,29 @@
+.card {
+  position: relative;
+  background: url('../../../assets/image/alertcard.png') no repeat center/cover;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+  width: 100%;
+  height: 9rem;
+}
+
+.message {
+  margin-top: 0.5rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.linkText {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+.customButton {
+  color: #f2f4dd;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 30rem;
+}

@@ -1,0 +1,119 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+  z-index: 9998;
+}
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  border-radius: 1rem 1rem 0 0;
+  box-shadow: 0 -0.25rem 1rem rgba(0, 0, 0, 0.15);
+  transform: translateY(0);
+  transition: transform 160ms ease-out;
+  padding: 0.75rem 1rem 1rem;
+  z-index: 9999;
+  max-height: 80vh;
+  overflow: auto;
+}
+.grip {
+  width: 3.25rem;
+  height: 0.375rem;
+  background: #e6e6e6;
+  border-radius: 999px;
+  margin: 0.5rem auto 1rem;
+}
+
+.sheetHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.item {
+  display: grid;
+  grid-template-columns: 3.5rem 1fr;
+  gap: 0.75rem;
+  align-items: center;
+}
+.thumb {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  background: #eee;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nameInput {
+  flex: 1;
+  border: none;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 0.25rem 0.125rem;
+  font-size: 0.95rem;
+}
+.deleteBtn {
+  border: 1px solid #eee;
+  background: #fff;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.qtyBox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.qtyBox > button {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ddd;
+  background: #fff;
+}
+.qtyBox > span {
+  min-width: 1.25rem;
+  text-align: center;
+}
+.unit {
+  border: 1px solid #ddd;
+  padding: 0.25rem 0.375rem;
+  border-radius: 0.5rem;
+}
+.date {
+  flex: 1;
+  border: 1px solid #ddd;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #eee;
+}

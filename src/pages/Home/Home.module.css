@@ -1,0 +1,101 @@
+.header {
+  padding-top: 3rem;
+  margin-bottom: 2rem;
+}
+
+.logoRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logoIcon {
+  width: 2rem;
+  height: 2rem;
+}
+
+.logoTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.greeting {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 2rem;
+  line-height: 2.3rem;
+  margin-bottom: 1.3rem;
+}
+
+.headerAlert {
+  margin-bottom: 0rem;
+}
+.headerSearch {
+  margin-bottom: 1.2rem;
+}
+.recommendTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.recipeList {
+  display: flex;
+  gap: 1rem;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+/* 홈 전용 ImageCoin 래퍼 */
+.homeCoin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem; /* 아이콘과 텍스트 간 6px */
+}
+
+/* 코인(원형) 영역 */
+.homeCoinCircle {
+  width: 4.375rem; /* 70px */
+  height: 4.375rem; /* 70px */
+  border-radius: 35%;
+  background-color: #87df00; /* 배경색 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 코인 내부 svg 아이콘 색상 */
+.homeCoinCircle svg {
+  width: 2.2rem; /* 24px */
+  height: 2.2rem;
+  color: #008100;
+  fill: None;
+  stroke: currentColor;
+}
+
+/* 코인 아래 텍스트 */
+.homeCoinText {
+  font-size: 0.75rem; /* 12px */
+  font-weight: 600; /* semibold */
+  color: #989898;
+  text-align: center;
+  margin-bottom: 1.1rem;
+}
+
+/* 코인들 간격 */
+.homeCoinRow {
+  display: flex;
+  gap: 1.5rem; /* 20px */
+}
