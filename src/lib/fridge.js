@@ -92,6 +92,43 @@ export async function deleteFridgeIngredient({
     headers: authHeaders(token),
   });
 }
+export async function removeIngredient(userId, ingredientId) {
+  // 👉 네 API 경로에 맞게 필요하면 수정
+  const res = await api.delete(
+    `/api/users/${userId}/fridge/ingredients/${ingredientId}`
+  );
+  return res.data;
+}
+
+export async function removeIngredientsByNames(userId, names = []) {
+  const clean = names.map((n) => String(n).trim()).filter(Boolean);
+  if (!clean.length) return { ok: true, deleted: [] };
+
+  // 1) 서버가 배치 삭제 지원하면 우선 사용
+  try {
+    const res = await api.delete(
+      `/api/users/${userId}/fridge/ingredients/by-names`,
+      {
+        data: { names: clean },
+      }
+    );
+    return res.data; // { ok, deleted: [...] } 형태 가정
+  } catch (err) {
+    const st = err?.response?.status;
+    if (st && st !== 404 && st !== 405) throw err; // 다른 에러면 그대로 던짐
+  }
+
+  // 2) 대체: 목록 조회 → 이름 매칭 → 개별 삭제
+  const data = await getIngredients(userId);
+  const raw = Array.isArray(data) ? data : (data?.refrigeratorIngredient ?? []);
+  const set = new Set(clean.map((s) => s.toLowerCase()));
+  const targets = raw.filter((it) =>
+    set.has(String(it.name || '').toLowerCase())
+  );
+
+  await Promise.allSettled(targets.map((t) => removeIngredient(userId, t.id)));
+  return { ok: true, deleted: targets.map((t) => t.name) };
+}
 
 //사진에서 재료 추출하기
 export async function extractIngredientsFromImage({

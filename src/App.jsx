@@ -6,6 +6,7 @@ import AuthLogin from './pages/Auth/AuthLogin';
 import RecipesRouter from './pages/Recipes/RecipesRouter';
 import FridgeRouter from './pages/Fridge/FridgeRouter';
 import ProfileRouter from './pages/Profile/ProfileRouter';
+import AuthCallback from './pages/Auth/AuthCallback';
 
 import style from './App.module.css';
 import ComponentsTest from './components/ComponentsTest';
@@ -65,6 +66,7 @@ export default () => {
                     </RequireAuth>
                   }
                 />
+                <Route path="auth/callback" element={<AuthCallback />} />
                 <Route
                   path="recipes/*"
                   element={

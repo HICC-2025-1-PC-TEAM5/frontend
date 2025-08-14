@@ -1,1 +1,28 @@
+.segmentedControl,
+.subControl {
+  display: flex;
+  flex-wrap: nowrap; /* 줄바꿈 금지 */
+  gap: 0.8rem;
+  padding: 0 1rem 0.4rem;
+  overflow-x: auto; /* 가로 스크롤 허용 */
+  overflow-y: hidden;
+  max-width: 100vw; /* 뷰포트 밖으로 못 나가게 */
+  -webkit-overflow-scrolling: touch; /* iOS 관성 스크롤 */
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity; /* 가까우면 스냅 */
+  scrollbar-width: none; /* Firefox 스크롤바 숨김 */
+  touch-action: pan-x pinch-zoom; /* 손가락으로 좌우 스와이프 */
+}
 
+/* 크롬/사파리 스크롤바 숨김 */
+.segmentedControl::-webkit-scrollbar,
+.subControl::-webkit-scrollbar {
+  display: none;
+}
+
+/* ✅ 버튼이 줄바꿈/축소되지 않도록 */
+.tabButton {
+  flex: 0 0 auto; /* 축소 금지 + 고정 폭 항목으로 */
+  white-space: nowrap; /* 텍스트 줄바꿈 금지 */
+  scroll-snap-align: start;
+}

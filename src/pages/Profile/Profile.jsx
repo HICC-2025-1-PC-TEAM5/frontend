@@ -1,26 +1,26 @@
-import { useState } from 'react';
+// src/pages/Profile/Profile.jsx
 import { Link, useNavigate } from 'react-router';
 import styles from './Profile.module.css';
 import Button from '../../components/Button';
 import Nav from '../../components/Nav';
 import PreferenceInfo from './components/PreferenceInfo';
-import PersonalInfo from './components/PersonalInfo';
 import ImageCard from '../../components/ImageCard';
 import Stack from '../../components/Stack';
 import Wrapper from '../../components/Wrapper';
+import ProfileHeader from './components/ProfileHeader';
+import { useSavedRecipes } from '../Recipes/SavedRecipesContext';
 
-export default function Profile({ username = '홍길동' }) {
+export default function Profile() {
   const navigate = useNavigate();
+  const { list: savedList = [] } = useSavedRecipes();
+  const handleCardClick = (rid) => navigate(`/recipes/${rid}`);
 
-  const imageData = [
-    { id: 1, imageSrc: '/img/recipe1.jpg', text: '레시피 1', variant: 'large' },
-    { id: 2, imageSrc: '/img/recipe2.jpg', text: '레시피 2', variant: 'large' },
-    { id: 3, imageSrc: '/img/recipe3.jpg', text: '레시피 3', variant: 'large' },
-  ];
-
-  const handleCardClick = (id) => {
-    navigate(`/recipes/${id}`);
-  };
+  const normalized = savedList.map((it) => ({
+    id: it.id ?? it.rid ?? it.recipeId,
+    title: it.title ?? it.name ?? '',
+    imageSrc: it.imageSrc ?? it.image ?? it?.thumbnail?.Url ?? '',
+    variant: 'large',
+  }));
 
   return (
     <>
@@ -32,24 +32,17 @@ export default function Profile({ username = '홍길동' }) {
             align="center"
             fill="width"
           >
-            <Stack className={styles.headerProfile} align="center">
-              <div className={styles.profileImageWrapper}>
-                <img
-                  src="/img/profile.jpg"
-                  alt="프로필"
-                  className={styles.profileImage}
-                />
-              </div>
-              <div className={styles.profileTextWrapper}>
-                <h2 className={styles.username}>{username}님</h2>
+            <Stack className={styles.headerProfile} align="center" gap="narrow">
+              {/* ✅ 컨텍스트에서 username/사진 모두 읽음 */}
+              <ProfileHeader />
 
-                <Stack gap="narrow">
-                  <Button size="small">20대</Button>
-                  <Button size="small">자취</Button>
-                  <Button size="small">1인 가구</Button>
-                </Stack>
-              </div>
+              <Stack gap="narrow">
+                <Button size="small">20대</Button>
+                <Button size="small">자취</Button>
+                <Button size="small">1인 가구</Button>
+              </Stack>
             </Stack>
+
             <div className={styles.headerSettings}>
               <Link to="/profile/settings">
                 <Button>설정</Button>
@@ -58,23 +51,29 @@ export default function Profile({ username = '홍길동' }) {
           </Stack>
 
           <PreferenceInfo />
-          <PersonalInfo />
 
           <h3 className={styles.recommendTitle}>저장한 요리</h3>
           <div className={styles.content}>
-            {imageData.map((item) => (
-              <div
-                key={item.id}
-                onClick={() => handleCardClick(item.id)}
-                className={styles.cardWrapper}
-              >
-                <ImageCard
-                  imageSrc={item.imageSrc}
-                  text={item.text}
-                  variant={item.variant}
-                />
-              </div>
-            ))}
+            {normalized.length === 0 ? (
+              <p style={{ gridColumn: '1 / -1', color: 'var(--color-tone-8)' }}>
+                아직 저장한 레시피가 없습니다
+              </p>
+            ) : (
+              normalized.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => handleCardClick(item.id)}
+                  className={styles.cardWrapper}
+                  style={{ all: 'unset', cursor: 'pointer' }}
+                >
+                  <ImageCard
+                    imageSrc={item.imageSrc}
+                    text={item.title}
+                    variant={item.variant}
+                  />
+                </button>
+              ))
+            )}
           </div>
         </Wrapper>
       </div>

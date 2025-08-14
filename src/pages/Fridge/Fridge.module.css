@@ -78,6 +78,11 @@
 .category {
   background: lightgray;
 }
+
+.categoryArea {
+  padding-right: var(--header-actions-width);
+  overflow: visible;
+}
 .category .button.selected {
   color: black;
 }

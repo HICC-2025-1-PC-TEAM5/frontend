@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useState, useMemo } from 'react';
+import { useNavigate, useParams } from 'react-router';
 import styles from './Recipe.module.css';
 import RecipeInfo from '../components/RecipeInfo';
 import ImageCoin from '../../../components/ImageCoin';
@@ -8,32 +8,58 @@ import PeopleCounter from '../components/PeopleCounter';
 import Wrapper from '../../../components/Wrapper';
 import Stack from '../../../components/Stack';
 import CookingStep from '../components/CookingStep';
-import { useParams } from 'react-router';
+// ✅ 조리완료 시 냉장고 재료 삭제
+import { removeIngredient } from '../../../lib/fridge';
 
+// 더미 데이터(현재 레시피 연결 전이므로 화면 확인용)
 const ingredientsNo = [
-  { id: 1, imageSrc: '', text: '이름', variant: 'medium' },
-  { id: 2, imageSrc: '', text: '이름', variant: 'medium' },
+  { id: 1, imageSrc: '', text: '굴소스', variant: 'medium' },
+  { id: 2, imageSrc: '', text: '맛술', variant: 'medium' },
 ];
-
 const ingredientsYes = [
-  { id: 1, imageSrc: '', text: '이름', variant: 'medium' },
-  { id: 2, imageSrc: '', text: '이름', variant: 'medium' },
-  { id: 3, imageSrc: '', text: '이름', variant: 'medium' },
-  { id: 4, imageSrc: '', text: '이름', variant: 'medium' },
+  { id: 1, imageSrc: '', text: '냉동새우', variant: 'medium' },
+  { id: 2, imageSrc: '', text: '파', variant: 'medium' },
+  { id: 3, imageSrc: '', text: '즉석밥', variant: 'medium' },
+  { id: 4, imageSrc: '', text: '계란', variant: 'medium' },
 ];
 
-function Recipe() {
+export default function Recipe() {
   const { id } = useParams();
   const navigate = useNavigate();
   const handleBack = () => navigate(-1);
 
+  // 조리 시작/완료 상태
   const [showSteps, setShowSteps] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const steps = [
     { step: 1, title: '재료 손질', desc: '야채를 깨끗이 씻고 손질하세요.' },
     { step: 2, title: '볶기', desc: '중불에서 5분간 볶으세요.' },
     { step: 3, title: '마무리', desc: '간을 하고 불을 끕니다.' },
   ];
+
+  // 조리 완료 시 사용할 재료 이름 목록(“있어요”만)
+  const usedIngredientNames = useMemo(
+    () => ingredientsYes.map((i) => i.text).filter(Boolean),
+    []
+  );
+
+  const handleStart = () => setShowSteps(true);
+
+  const handleComplete = async () => {
+    try {
+      setSaving(true);
+      const userId = import.meta.env.VITE_DEV_USER_ID || '1';
+      // ✅ 냉장고에서 사용 재료 삭제 (서버에서 /by-names 지원 or fallback으로 개별 삭제)
+      await removeIngredientsByNames(userId, usedIngredientNames);
+      navigate('/fridge');
+    } catch (e) {
+      console.error(e);
+      alert('조리 완료 처리 중 오류가 발생했어요.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <>
@@ -42,12 +68,11 @@ function Recipe() {
           <Stack justify="space-between" align="center" fill="all" gap="none">
             <div className={styles.headerSide}>
               <button
-                variant="invisible"
                 onClick={handleBack}
                 className={styles.backButton}
-                icon="only"
+                aria-label="뒤로"
               >
-                <span icon="icon">←</span>
+                ←
               </button>
             </div>
             <div className={styles.headerMain}>
@@ -65,9 +90,11 @@ function Recipe() {
         </Wrapper>
       </div>
 
+      {/* 재료 섹션은 항상 보이게 유지(요구사항 스샷과 동일) */}
       <div className={styles.ingredients}>
         <Wrapper>
           <h2>재료</h2>
+
           <h4>없어요</h4>
           <Stack>
             {ingredientsNo.map((item) => (
@@ -92,20 +119,20 @@ function Recipe() {
         </Wrapper>
       </div>
 
+      {/* 하단: 조리 시작 전엔 SelectHeader 영역(=PeopleCounter), 시작 후엔 요리 순서 + 조리완료 */}
       {!showSteps ? (
-        // showSteps === false → PeopleCounter + 조리시작 버튼
         <div className={styles.control}>
           <Wrapper fill="height">
-            <PeopleCounter />
-            <Button variant="primary" onClick={() => setShowSteps(true)}>
+            <PeopleCounter onStartCooking={handleStart} />
+            <Button variant="primary" onClick={handleStart}>
               조리시작
             </Button>
           </Wrapper>
         </div>
       ) : (
-        // showSteps === true → CookingStep + 조리완료 버튼
         <div className={styles.steps}>
           <Wrapper>
+            <h2>요리 순서</h2>
             {steps.map((s) => (
               <CookingStep
                 key={s.step}
@@ -114,7 +141,13 @@ function Recipe() {
                 description={s.desc}
               />
             ))}
-            <Button variant="primary">조리완료</Button>
+            <Button
+              variant="primary"
+              onClick={handleComplete}
+              disabled={saving}
+            >
+              {saving ? '처리 중…' : '조리완료'}
+            </Button>
           </Wrapper>
         </div>
       )}
@@ -122,25 +155,4 @@ function Recipe() {
       <div className={styles.controlMargin}></div>
     </>
   );
-}
-
-export default Recipe;
-
-{
-  /*<div className={styles.tools}>
-        <Wrapper>
-          <h2>조리도구</h2>
-          <Stack gap="narrow">
-            <Button variant="activate" size="small">
-              프라이팬
-            </Button>
-            <Button variant="default" size="small">
-              집게
-            </Button>
-            <Button variant="default" size="small">
-              접시
-            </Button>
-          </Stack>
-        </Wrapper>
-      </div>*/
 }

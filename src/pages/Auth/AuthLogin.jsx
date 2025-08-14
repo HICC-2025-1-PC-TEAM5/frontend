@@ -1,68 +1,41 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+// src/pages/Auth/AuthLogin.jsx
+import { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router';
 import styles from './AuthLogin.module.css';
 import LogoIcon from '../../assets/svg/Main/logo.svg?react';
+import { useUser } from '../UserContext';
 
-const API = import.meta.env.VITE_API_BASE_URL; // ✅ .env 값 불러오기
+const API_BASE = import.meta.env.VITE_API_BASE_URL; // .env 값
 
 export default function AuthLogin() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { isAuthed } = useUser() || {};
+  const from = location.state?.from?.pathname || '/';
 
-  const handleLogin = () => {
-    window.location.href = `${API}/api/v2/oauth2/google`;
-  };
-
-  const restoreSession = async () => {
-    setLoading(true);
-    try {
-      const r1 = await fetch(`${API}/api/auth/refresh`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-      if (!r1.ok) {
-        setLoading(false);
-        return;
-      }
-      const j1 = await r1.json();
-      const access = j1?.data?.access;
-      if (!access) {
-        setLoading(false);
-        return;
-      }
-
-      localStorage.setItem('access', access);
-
-      const r2 = await fetch(`${API}/api/users/me`, {
-        headers: { Authorization: `Bearer ${access}` },
-      });
-      if (!r2.ok) {
-        setLoading(false);
-        return;
-      }
-      const j2 = await r2.json();
-      setUser(j2?.data ?? j2);
-
-      navigate('/');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // 이미 로그인 상태면 돌아가기
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('from') === 'oauth') {
-      restoreSession().finally(() => {
-        params.delete('from');
-        const clean = params.toString();
-        const newUrl = `${window.location.pathname}${clean ? `?${clean}` : ''}${window.location.hash || ''}`;
-        window.history.replaceState(null, '', newUrl);
-      });
-    } else {
-      setLoading(false);
-    }
-  }, []);
+    if (isAuthed) navigate(from, { replace: true });
+  }, [isAuthed, from, navigate]);
+
+  // 구글 OAuth 시작
+  const handleLogin = () => {
+    // 프론트 콜백으로 돌아오게 설정(백엔드가 redirect_uri 지원 시)
+    const redirectUri = `${window.location.origin}/auth/callback?from=${encodeURIComponent(
+      from
+    )}`;
+    const withRedirect = `${API_BASE}/api/v2/oauth2/google?redirect_uri=${encodeURIComponent(
+      redirectUri
+    )}`;
+    const fallback = `${API_BASE}/api/v2/oauth2/google`;
+
+    // 우선 redirect_uri 포함해서 시도
+    window.location.assign(withRedirect);
+
+    // 서버가 redirect_uri를 지원하지 않아도,
+    // 기본 콜백으로 리다이렉트된 뒤 AuthCallback에서 처리하면 됨.
+    // 필요하면 try/catch로 실패 감지 후 fallback으로 재시도 가능.
+  };
 
   return (
     <div className={styles.container}>
@@ -73,13 +46,9 @@ export default function AuthLogin() {
 
       <h2 className={styles.title}>로그인</h2>
 
-      {loading ? (
-        <p>로딩 중...</p>
-      ) : (
-        <button className={styles.loginButton} onClick={handleLogin}>
-          구글 계정 로그인
-        </button>
-      )}
+      <button className={styles.loginButton} onClick={handleLogin}>
+        구글 계정 로그인
+      </button>
     </div>
   );
 }

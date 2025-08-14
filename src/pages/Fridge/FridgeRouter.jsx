@@ -3,6 +3,7 @@ import Fridge from './Fridge';
 import Ingredient from './Ingredients/Ingredient';
 import AddForm from './Ingredients/AddForm';
 import CameraAdd from './Ingredients/CameraAdd';
+import EditList from './Ingredients/EditList';
 
 export default () => {
   return (
@@ -14,6 +15,7 @@ export default () => {
         <Route path="ingredients/add" element={<AddForm />} />
         <Route path="ingredients/add/form" element={<AddForm />} />
         <Route path="ingredients/add/camera" element={<CameraAdd />} />
+        <Route path="ingredients/edit" element={<EditList />} />
       </Routes>
     </>
   );
