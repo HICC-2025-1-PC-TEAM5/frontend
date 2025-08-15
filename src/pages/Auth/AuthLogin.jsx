@@ -16,6 +16,7 @@ export default function AuthLogin() {
   const handleOAuthCallback = async () => {
     const params = new URLSearchParams(location.search);
     const access = params.get('access');
+    console.log(12345);
 
     if (access) {
       login({ token: access, username: '사용자' }); // username은 임시, 필요 시 서버에서 가져오세요
@@ -31,38 +32,46 @@ export default function AuthLogin() {
 
   // 2️⃣ 세션 복원: access 없으면 refresh 호출
   const restoreSession = async () => {
+    console.log(12345);
     const res = await fetch(`${API}/api/auth/refresh`, {
       method: 'POST',
       credentials: 'include',
     });
+    console.log(12345);
     if (!res.ok) return;
 
     const j = await res.json();
     const access = j?.data?.access;
+    console.log(1234);
+    console.log(access);
     if (!access) return;
-
-    // 1) access token 저장
-    login({ access, username: '...' }); // 임시
 
     // 2) 사용자 정보 조회
     const userRes = await fetch(`${API}/api/users/me`, {
       headers: { Authorization: `Bearer ${access}` },
     });
+    console.log('123123');
     const userJson = await userRes.json();
 
-    login({
-      access,
-      id: userJson?.data?.id,
-      username: userJson?.data?.name,
-      email: userJson?.data?.email,
-      picture: userJson?.data?.picture,
-    });
+    console.log(userJson?.data?.id);
+    console.log(userJson?.data?.name);
+
+    login(
+      access, // token (문자열)
+      {
+        id: userJson?.data?.id,
+        username: userJson?.data?.name,
+        email: userJson?.data?.email,
+        photoUrl: userJson?.data?.picture,
+      }
+    );
 
     navigate('/', { replace: true });
   };
 
   useEffect(() => {
     // 먼저 URL에서 access token 처리
+    console.log('AuthLogin 렌더링됨');
     handleOAuthCallback().then((handled) => {
       if (!handled) {
         // 없으면 refresh 시도
