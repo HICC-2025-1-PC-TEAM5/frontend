@@ -16,8 +16,23 @@ import { getIngredients, getNecessaryIngredients } from '../../lib/fridge';
 import { useUser } from '../UserContext';
 
 /* =========================
-   정규화 유틸 (서버 한글 → UI id)
+   유틸
    ========================= */
+// 서버가 "image.jpg"처럼 파일명만 줄 때 절대 URL로 보정
+function toAbsoluteUrl(name) {
+  if (!name) return '';
+  if (/^https?:\/\//i.test(name)) return name; // 이미 절대 경로면 그대로
+  const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+  const imgBase = (import.meta.env.VITE_IMAGE_BASE_PATH || '/files').replace(
+    /^\//,
+    ''
+  );
+  return apiBase
+    ? `${apiBase}/${imgBase}/${encodeURIComponent(name)}`
+    : `/${imgBase}/${encodeURIComponent(name)}`;
+}
+
+/* 서버 한글 → UI id */
 function normalizeLocationKo(type) {
   const v = String(type || '').trim();
   if (v.includes('냉장')) return 'fridge';
@@ -56,8 +71,7 @@ const normName = (s) =>
 
 export default function Fridge() {
   const navigate = useNavigate();
-  // ✅ useUser() 올바른 사용: 컨텍스트에서 user 객체를 꺼내서 id 참조
-  const { user, isAuthed } = useUser();
+  const { user } = useUser();
   const userIdFromCtx = user?.id;
 
   // 정렬/데이터
@@ -85,21 +99,23 @@ export default function Fridge() {
           : (data?.refrigeratorIngredient ?? []);
 
         const list = raw.map((it) => {
-          const main = normalizeLocationKo(it.type);
-          const img =
-            it.imageUrl ||
+          const main = normalizeLocationKo(it.type ?? it.location ?? it.main);
+          // 🔥 서버 값만 사용 + 파일명 → 절대 URL 보정
+          const first =
             it.image ||
-            it.imageSrc ||
+            it.imageUrl ||
             it.thumbnail ||
             it.thumbnailUrl ||
-            `https://picsum.photos/seed/${encodeURIComponent(it.name || it.id)}/600/400`;
+            it.photo ||
+            '';
+          const img = toAbsoluteUrl(first);
 
           return {
             id: it.id,
             imageSrc: img,
             title: it.name,
             desc: it.expire_date
-              ? `유통기한 ${it.expire_date.slice(0, 10)}`
+              ? `유통기한 ${String(it.expire_date).slice(0, 10)}`
               : '',
             location: main, // 'fridge'|'freezer'|'room'
             subCategory: normalizeCategoryKo(main, it.category),
@@ -107,17 +123,16 @@ export default function Fridge() {
         });
         if (!ignore) setItems(list);
 
-        // 2) 필수 재료 추천에서 "내 냉장고에 없는" 것만 걸러 코인으로 사용
+        // 2) 필수 재료 추천: 내 냉장고에 없는 것만
         const ownedNames = new Set(list.map((it) => normName(it.title)));
-        const necessary = await getNecessaryIngredients(userId); // 서버: { ingredientList: [...] } -> 함수에서 배열로 반환됨
+        const necessary = await getNecessaryIngredients(userId); // 함수에서 배열로 반환
         const missing = (necessary || []).filter(
           (n) => !ownedNames.has(normName(n.name))
         );
 
-        // UI용 코인 데이터로 매핑 (클릭 불필요)
         const coins = missing.slice(0, 8).map((n) => ({
           id: n.id,
-          imageSrc: n.imageUrl || '',
+          imageSrc: toAbsoluteUrl(n.image || n.imageUrl || n.photo || ''),
           text: n.name,
           variant: 'small',
           allergy: !!n.allergy,

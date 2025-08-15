@@ -1,3 +1,4 @@
+// src/pages/Recipes/Recipes.jsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import styles from './Recipes.module.css';
@@ -25,7 +26,6 @@ function Recipes() {
   const handleSortChange = (v) => {
     const next = v?.target ? v.target.value : v;
     setSort(next);
-    // 서버 정렬 지원 시 여기서 다시 요청: params.sort = next
     fetchRecipes(next);
   };
 
@@ -35,22 +35,19 @@ function Recipes() {
       setError('');
       if (!userId) throw new Error('로그인이 필요합니다.');
 
-      // 1) 추천 파라미터 구성(좋아요 재료 + 싫어요/알레르기 재료)
+      // 1) 추천 파라미터 구성
       const params = await buildRecommendParams(userId);
-      // 옵션: 정렬키 서버가 받는다면 함께 전송
       if (sortKey) params.sort = sortKey;
 
-      // 2) 서버 추천 호출 (POST, querystring 사용)
-      //    서버가 GET을 원하면 get으로 바꾸고 body 제거
-      const { data } = await api.post(
-        `/api/users/${userId}/recipes`,
-        null,
-        { params } // ?likeIngredients=..&excludeIngredients=..&sort=..
-      );
+      // 2) GET + querystring으로 호출 (415 방지)
+      const { data } = await api.get(`/api/users/${userId}/recipes`, {
+        params,
+      });
 
-      setList(data?.recipe || []);
+      setList(Array.isArray(data?.recipe) ? data.recipe : []);
     } catch (e) {
-      setError(e.message || '레시피를 불러오지 못했습니다.');
+      setList([]);
+      setError(e?.message || '레시피를 불러오지 못했습니다.');
     } finally {
       setLoading(false);
     }

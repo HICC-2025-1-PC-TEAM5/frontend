@@ -13,7 +13,7 @@ export default function AddForm() {
   const handleBack = () => navigate(-1);
   const goReceipt = () =>
     navigate('/fridge/ingredients/add/camera?mode=receipt');
-  const goPhoto = () => navigate('/fridge/ingredients/add/camera?mode=phto');
+  const goPhoto = () => navigate('/fridge/ingredients/add/camera?mode=photo');
 
   return (
     <>

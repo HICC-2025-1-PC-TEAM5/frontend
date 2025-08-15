@@ -182,7 +182,10 @@ export async function apiFetch(
 
   const doFetch = async (accessOverride) => {
     const hdrs = {
+      // FormData일 땐 Content-Type 자동설정(생략)
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+      // 서버가 text로 "OK"를 줄 수도 있으니 Accept 범위 넓게
+      Accept: 'application/json, text/plain;q=0.9, */*;q=0.8',
       ...(!skipAuth && (accessOverride || token)
         ? { Authorization: `Bearer ${accessOverride || token}` }
         : {}),
@@ -196,6 +199,41 @@ export async function apiFetch(
       signal: controller.signal,
     });
     return res;
+  };
+
+  // 응답 본문 파서(성공 케이스)
+  const parseOkBody = async (res) => {
+    if (res.status === 204) return null;
+    const ct = (res.headers.get('content-type') || '').toLowerCase();
+
+    // JSON이면 json()
+    if (ct.includes('application/json')) {
+      return res.json();
+    }
+
+    // 텍스트면 text()
+    const text = await res.text();
+
+    // 서버가 "OK"만 주는 경우 → 통일된 형태로 반환
+    if (text && text.trim().toLowerCase() === 'ok') {
+      return { ok: true };
+    }
+
+    // 그 외 텍스트는 그대로 반환 (필요하면 상위에서 사용)
+    return text;
+  };
+
+  // 응답 본문 파서(오류 케이스)
+  const parseErrBody = async (res) => {
+    const ct = (res.headers.get('content-type') || '').toLowerCase();
+    try {
+      if (ct.includes('application/json')) {
+        return await res.json();
+      }
+      return await res.text();
+    } catch {
+      return null;
+    }
   };
 
   try {
@@ -217,15 +255,21 @@ export async function apiFetch(
       }
     }
 
+    // 최종 상태코드 평가
     if (!res.ok) {
-      const msg = await res.text().catch(() => '');
+      const data = await parseErrBody(res);
+      const msg =
+        (typeof data === 'string' && data) ||
+        (data && (data.message || data.error || JSON.stringify(data))) ||
+        '';
       const err = new Error(msg || `요청 실패 (${res.status})`);
       err.status = res.status;
+      err.data = data ?? null;
       throw err;
     }
 
-    if (res.status === 204) return null;
-    return await res.json();
+    // 성공 파싱
+    return await parseOkBody(res);
   } catch (err) {
     if (err.name === 'AbortError') {
       const e = new Error('요청 시간 초과');
