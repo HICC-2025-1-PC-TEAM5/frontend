@@ -1,0 +1,66 @@
+.wrap {
+  padding: 0 1rem;
+  margin-bottom: 1rem;
+}
+
+.title {
+  font-size: 1rem; /* 16px */
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 0.75rem;
+}
+
+.row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.coin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.circle {
+  width: 4.375rem; /* 70px */
+  height: 4.375rem;
+  border-radius: 35%;
+  background: #e7f4d1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.circle.warn {
+  outline: 0.125rem solid #ff8080; /* 알레르기 표시 */
+}
+
+.circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.fallback {
+  font-size: 1.5rem;
+  line-height: 1;
+  opacity: 0.5;
+}
+
+.label {
+  font-size: 0.75rem; /* 12px */
+  font-weight: 600;
+  color: #989898;
+  text-align: center;
+  max-width: 5.5rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}

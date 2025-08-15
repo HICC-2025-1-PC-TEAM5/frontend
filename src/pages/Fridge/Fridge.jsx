@@ -1,3 +1,4 @@
+// src/pages/Fridge/Fridge.jsx
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, Link } from 'react-router';
 import Button from '../../components/Button';
@@ -11,7 +12,8 @@ import Stack from '../../components/Stack';
 import styles from './Fridge.module.css';
 import PencilIcon from '../../assets/svg/Fridge/Pencil.svg?react';
 import PlusIcon from '../../assets/svg/Fridge/Plus.svg?react';
-import { getIngredients } from '../../lib/fridge';
+import { getIngredients, getNecessaryIngredients } from '../../lib/fridge';
+import { useUser } from '../UserContext';
 
 /* =========================
    정규화 유틸 (서버 한글 → UI id)
@@ -47,9 +49,14 @@ function normalizeCategoryKo(main, ko) {
   if (v === '가공식품') return 'processed';
   return 'etc';
 }
+const normName = (s) =>
+  String(s || '')
+    .trim()
+    .toLowerCase();
 
 export default function Fridge() {
   const navigate = useNavigate();
+  const { id: userIdFromCtx } = useUser();
 
   // 정렬/데이터
   const [sortOption, setSortOption] = useState('latest');
@@ -59,20 +66,16 @@ export default function Fridge() {
   const [mainCat, setMainCat] = useState('all'); // all | fridge | freezer | room
   const [subCat, setSubCat] = useState('all');
 
-  // 추천 섹션(원래 구조 유지용 간단 더미)
-  const recommends = [
-    { id: 'rec-1', imageSrc: '', text: '양파', variant: 'small' },
-    { id: 'rec-2', imageSrc: '', text: '달걀', variant: 'small' },
-    { id: 'rec-3', imageSrc: '', text: '우유', variant: 'small' },
-  ];
+  // 필수 재료 추천(이미지코인)
+  const [necessaryCoins, setNecessaryCoins] = useState([]);
 
   useEffect(() => {
     (async () => {
       try {
-        const userId = import.meta.env.VITE_DEV_USER_ID || '1';
-        const data = await getIngredients(userId);
+        const userId = userIdFromCtx || import.meta.env.VITE_DEV_USER_ID || '1';
 
-        // 배열로 오든 { refrigeratorIngredient: [] }로 오든 모두 처리
+        // 1) 현재 냉장고 재료 불러오기
+        const data = await getIngredients(userId);
         const raw = Array.isArray(data)
           ? data
           : (data?.refrigeratorIngredient ?? []);
@@ -89,25 +92,39 @@ export default function Fridge() {
 
           return {
             id: it.id,
-            imageSrc: img, // 빈 문자열 금지
+            imageSrc: img,
             title: it.name,
-            // 카드 하단 보조 텍스트(원본 구조 유지)
             desc: it.expire_date
               ? `유통기한 ${it.expire_date.slice(0, 10)}`
               : '',
-            // 필터링용(렌더엔 직접 쓰지 않음)
             location: main, // 'fridge'|'freezer'|'room'
-            subCategory: normalizeCategoryKo(main, it.category), // 하위 카테고리 id
+            subCategory: normalizeCategoryKo(main, it.category),
           };
         });
-
         setItems(list);
+
+        // 2) 필수 재료 추천에서 "내 냉장고에 없는" 것만 걸러 코인으로 사용
+        const ownedNames = new Set(list.map((it) => normName(it.title)));
+        const necessary = await getNecessaryIngredients(userId); // [{id,name,imageUrl,category,allergy}]
+        const missing = (necessary || []).filter(
+          (n) => !ownedNames.has(normName(n.name))
+        );
+
+        // UI용 코인 데이터로 매핑
+        const coins = missing.slice(0, 8).map((n) => ({
+          id: n.id,
+          imageSrc: n.imageUrl || '',
+          text: n.name,
+          variant: 'small',
+          allergy: !!n.allergy,
+        }));
+        setNecessaryCoins(coins);
       } catch (e) {
         console.error(e);
         alert('재료 불러오기 실패');
       }
     })();
-  }, []);
+  }, [userIdFromCtx]);
 
   const handleSortChange = (e) => {
     setSortOption(e.target.value);
@@ -122,14 +139,15 @@ export default function Fridge() {
       return true;
     });
 
-    // (선택) 정렬
     if (sortOption === 'name') {
       base = [...base].sort((a, b) => a.title.localeCompare(b.title, 'ko'));
     }
-    // 'expire', 'latest' 등은 실제 필드가 필요하면 추가 구현
-
     return base;
   }, [items, mainCat, subCat, sortOption]);
+
+  const goAddFormPrefilled = (name) => {
+    navigate('/fridge/add/form', { state: { presetName: name } });
+  };
 
   return (
     <>
@@ -161,24 +179,29 @@ export default function Fridge() {
         </div>
       </div>
 
-      {/* 추천 섹션(원래 클래스 유지) */}
-      <div className={styles.recommands}>
-        <div className={styles.message}>
-          <p>이 재료들을 구비해보는 건 어떨까요?</p>
+      {/* 추천 섹션: 필요한 재료(내 냉장고에 없는 것만) 이미지코인 */}
+      {necessaryCoins.length > 0 && (
+        <div className={styles.recommands}>
+          <div className={styles.message}>
+            <p>이 재료들을 구비해보는 건 어떨까요?</p>
+          </div>
+          <Wrapper>
+            <Stack gap="1rem" wrap="wrap">
+              {necessaryCoins.map((r) => (
+                <div key={r.id} onClick={() => goAddFormPrefilled(r.text)}>
+                  <ImageCoin
+                    imageSrc={r.imageSrc}
+                    text={r.text}
+                    variant={r.variant}
+                    // 알레르기 표시가 필요하면 ImageCoin 내부에 처리하거나 title로 전달
+                    titleAttr={r.allergy ? '알레르기 주의' : undefined}
+                  />
+                </div>
+              ))}
+            </Stack>
+          </Wrapper>
         </div>
-        <Wrapper>
-          <Stack gap="1rem" wrap="wrap">
-            {recommends.map((r) => (
-              <ImageCoin
-                key={r.id}
-                imageSrc={r.imageSrc}
-                text={r.text}
-                variant={r.variant}
-              />
-            ))}
-          </Stack>
-        </Wrapper>
-      </div>
+      )}
 
       {/* 카테고리(마크업 그대로, 값/이벤트만 연결) */}
       <CategorySelect

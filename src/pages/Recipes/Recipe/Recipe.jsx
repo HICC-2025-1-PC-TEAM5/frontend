@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+// src/pages/Recipes/Recipe/Recipe.jsx
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import styles from './Recipe.module.css';
 import RecipeInfo from '../components/RecipeInfo';
@@ -8,40 +9,67 @@ import PeopleCounter from '../components/PeopleCounter';
 import Wrapper from '../../../components/Wrapper';
 import Stack from '../../../components/Stack';
 import CookingStep from '../components/CookingStep';
-// ✅ 조리완료 시 냉장고 재료 삭제
-import { removeIngredient } from '../../../lib/fridge';
-
-// 더미 데이터(현재 레시피 연결 전이므로 화면 확인용)
-const ingredientsNo = [
-  { id: 1, imageSrc: '', text: '굴소스', variant: 'medium' },
-  { id: 2, imageSrc: '', text: '맛술', variant: 'medium' },
-];
-const ingredientsYes = [
-  { id: 1, imageSrc: '', text: '냉동새우', variant: 'medium' },
-  { id: 2, imageSrc: '', text: '파', variant: 'medium' },
-  { id: 3, imageSrc: '', text: '즉석밥', variant: 'medium' },
-  { id: 4, imageSrc: '', text: '계란', variant: 'medium' },
-];
+import { fetchRecipeDetail } from '../../../lib/recipes';
+import { removeIngredientsByNames } from '../../../lib/fridge'; // ✅ 새 유틸 사용
 
 export default function Recipe() {
   const { id } = useParams();
   const navigate = useNavigate();
   const handleBack = () => navigate(-1);
 
-  // 조리 시작/완료 상태
   const [showSteps, setShowSteps] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const steps = [
-    { step: 1, title: '재료 손질', desc: '야채를 깨끗이 씻고 손질하세요.' },
-    { step: 2, title: '볶기', desc: '중불에서 5분간 볶으세요.' },
-    { step: 3, title: '마무리', desc: '간을 하고 불을 끕니다.' },
-  ];
+  // ✅ API 상태
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState('');
+  const [detail, setDetail] = useState(null); // { recipe, recipeGuide }
 
-  // 조리 완료 시 사용할 재료 이름 목록(“있어요”만)
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoading(true);
+        setErr('');
+        const userId =
+          localStorage.getItem('userId') ||
+          import.meta.env.VITE_DEV_USER_ID ||
+          '1';
+        const data = await fetchRecipeDetail(userId, id);
+        setDetail(data);
+      } catch (e) {
+        setErr(e.message || '레시피 정보를 불러오지 못했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [id]);
+
+  const ingredientsYes = useMemo(() => {
+    const raw = detail?.recipe?.ingredients || '';
+    return raw
+      .split(/[\n,]/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((text, i) => ({ id: i + 1, imageSrc: '', text, variant: 'medium' }));
+  }, [detail]);
+
+  const ingredientsNo = []; // 서버 스펙 확정되면 교체
+
+  // ✅ 조리 순서
+  const steps = useMemo(() => {
+    const arr = detail?.recipeGuide?.steps || [];
+    // 백에서 stepNum, image, description 제공
+    return arr.map((s) => ({
+      step: s.stepNum,
+      title: s.image ? '이미지 참고' : `STEP ${s.stepNum}`,
+      desc: s.description,
+      image: s.image,
+    }));
+  }, [detail]);
+
   const usedIngredientNames = useMemo(
     () => ingredientsYes.map((i) => i.text).filter(Boolean),
-    []
+    [ingredientsYes]
   );
 
   const handleStart = () => setShowSteps(true);
@@ -49,8 +77,10 @@ export default function Recipe() {
   const handleComplete = async () => {
     try {
       setSaving(true);
-      const userId = import.meta.env.VITE_DEV_USER_ID || '1';
-      // ✅ 냉장고에서 사용 재료 삭제 (서버에서 /by-names 지원 or fallback으로 개별 삭제)
+      const userId =
+        localStorage.getItem('userId') ||
+        import.meta.env.VITE_DEV_USER_ID ||
+        '1';
       await removeIngredientsByNames(userId, usedIngredientNames);
       navigate('/fridge');
     } catch (e) {
@@ -61,6 +91,7 @@ export default function Recipe() {
     }
   };
 
+  const r = detail?.recipe;
   return (
     <>
       <div className={styles.header}>
@@ -86,24 +117,38 @@ export default function Recipe() {
 
       <div className={styles.recipe}>
         <Wrapper>
-          <RecipeInfo id={id} />
+          {loading ? (
+            <div>불러오는 중…</div>
+          ) : err ? (
+            <div>{err}</div>
+          ) : (
+            <RecipeInfo
+              id={r?.id}
+              imageSrc={r?.image}
+              name={r?.name}
+              description={`${r?.portion || ''} · ${r?.type || ''} · ${Math.round(r?.kcal || 0)} kcal`}
+            />
+          )}
         </Wrapper>
       </div>
 
-      {/* 재료 섹션은 항상 보이게 유지(요구사항 스샷과 동일) */}
       <div className={styles.ingredients}>
         <Wrapper>
           <h2>재료</h2>
 
           <h4>없어요</h4>
           <Stack>
-            {ingredientsNo.map((item) => (
-              <ImageCoin
-                key={item.id}
-                imageSrc={item.imageSrc}
-                text={item.text}
-              />
-            ))}
+            {ingredientsNo.length === 0 ? (
+              <div>없음</div>
+            ) : (
+              ingredientsNo.map((item) => (
+                <ImageCoin
+                  key={item.id}
+                  imageSrc={item.imageSrc}
+                  text={item.text}
+                />
+              ))
+            )}
           </Stack>
 
           <h4>있어요</h4>
@@ -119,7 +164,6 @@ export default function Recipe() {
         </Wrapper>
       </div>
 
-      {/* 하단: 조리 시작 전엔 SelectHeader 영역(=PeopleCounter), 시작 후엔 요리 순서 + 조리완료 */}
       {!showSteps ? (
         <div className={styles.control}>
           <Wrapper fill="height">
@@ -133,14 +177,18 @@ export default function Recipe() {
         <div className={styles.steps}>
           <Wrapper>
             <h2>요리 순서</h2>
-            {steps.map((s) => (
-              <CookingStep
-                key={s.step}
-                stepNumber={s.step}
-                title={s.title}
-                description={s.desc}
-              />
-            ))}
+            {steps.length === 0 ? (
+              <div>제공된 조리 순서가 없어요.</div>
+            ) : (
+              steps.map((s) => (
+                <CookingStep
+                  key={s.step}
+                  stepNumber={s.step} // ✅ 이름 맞춰 전달
+                  title={s.title}
+                  description={s.desc}
+                />
+              ))
+            )}
             <Button
               variant="primary"
               onClick={handleComplete}

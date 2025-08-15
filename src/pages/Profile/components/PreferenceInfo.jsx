@@ -7,21 +7,33 @@ import AllergyIcon from '../../../assets/svg/Profile/allergy.svg?react';
 import PencilIcon from '../../../assets/svg/Profile/pencil.svg?react';
 import EditSheet from './EditSheet';
 
-// ✅ 알레르기 API 유틸
+// 서버: 알레르기 / 클라: 재료 취향
 import {
   getAllergies,
-  removeAllergy /*, addAllergy */,
+  removeAllergy,
+  getIngredientPrefs,
+  saveIngredientPrefs,
 } from '../../../lib/preference';
 
+// UserContext 에서 로그인 사용자
+import { useUser } from '../../UserContext';
+
 export default function PreferenceInfo() {
-  // 👉 실제 로그인 사용자 id로 교체하세요. (예: auth context)
-  const userId = import.meta.env.VITE_DEV_USER_ID;
+  const { id: userId } = useUser() || {};
 
-  const [likes, setLikes] = useState(['한식', '중식']);
-  const [dislikes, setDislikes] = useState(['오이', '파래']);
+  // 재료 기반 좋아요/싫어요 (로컬)
+  const [{ likeIngredients, dislikeIngredients }, setIngredientPrefs] =
+    useState({
+      likeIngredients: [],
+      dislikeIngredients: [],
+    });
 
-  // ✅ 알레르기는 백엔드와 연동(객체 목록: {allergyId, name, ...})
-  const [allergyList, setAllergyList] = useState([]); // 서버 원본
+  // 화면 표시용
+  const likes = likeIngredients;
+  const dislikes = dislikeIngredients;
+
+  // 알레르기(서버)
+  const [allergyList, setAllergyList] = useState([]); // [{ allergyId, name }]
   const allergyNames = useMemo(
     () => allergyList.map((a) => a.name),
     [allergyList]
@@ -30,49 +42,52 @@ export default function PreferenceInfo() {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
 
-  // 최초 로드 시 서버에서 알레르기 목록 불러오기
+  // 최초 로드: 재료 취향(로컬) + 알레르기(서버)
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
-        const list = await getAllergies(userId); // [{allergyId, name, ...}]
-        setAllergyList(list);
+        const prefs = getIngredientPrefs();
+        setIngredientPrefs(prefs);
+
+        if (userId) {
+          const allergies = await getAllergies(userId);
+          setAllergyList(allergies || []);
+        }
       } finally {
         setLoading(false);
       }
     })();
   }, [userId]);
 
-  // EditSheet 저장 시: 삭제된 알러지만 서버에 즉시 반영
+  // EditSheet 저장
   const handleSubmit = async ({ likes: L, dislikes: D, allergies: A }) => {
-    setLikes(L);
-    setDislikes(D);
+    // 1) 재료 취향 저장(로컬)
+    const nextPrefs = { likeIngredients: L, dislikeIngredients: D };
+    saveIngredientPrefs(nextPrefs);
+    setIngredientPrefs(nextPrefs);
 
-    // 서버의 기존 알러지 이름 집합
-    const prevNames = new Set(allergyList.map((a) => a.name));
-    const nextNames = new Set(A);
+    // 2) 알레르기 동기화(서버: 삭제만 즉시, 추가는 ingredientId 필요 시 보류)
+    const prevAllergyNames = new Set(allergyList.map((a) => a.name));
+    const nextAllergyNames = new Set(A);
 
-    // 1) 삭제: 이전에는 있었는데 지금은 없는 이름 → allergyId로 DELETE
-    const toDelete = allergyList.filter((a) => !nextNames.has(a.name));
-    if (toDelete.length) {
+    // 삭제
+    const toDelete = allergyList.filter((a) => !nextAllergyNames.has(a.name));
+    if (userId && toDelete.length) {
       await Promise.allSettled(
         toDelete.map((a) => removeAllergy(userId, a.allergyId))
       );
     }
 
-    // 2) 추가: 지금은 있는데 이전엔 없던 이름들 (ingredientId 필요 → 일단 로컬로만 유지)
-    const addedNames = [...nextNames].filter((n) => !prevNames.has(n));
-    if (addedNames.length) {
-      // TODO: 여기서 이름→ingredientId 매핑 UI/엔드포인트가 준비되면 addAllergy(userId, ingredientId) 호출
-      // ex) await addAllergy(userId, ingredientId);
-      console.warn('추가된 알레르기(로컬만 반영):', addedNames);
+    // 추가(현재는 이름만 → ingredientId 선택 UI 생기면 addAllergy 사용)
+    const added = [...nextAllergyNames].filter((n) => !prevAllergyNames.has(n));
+    if (added.length) {
+      console.warn('추가된 알레르기(ingredientId 필요):', added);
     }
 
-    // 최종적으로 화면 상태를 next로 맞춤
-    // (삭제 반영된 서버 상태를 다시 fetch 해도 되고, 로컬 계산으로 갱신해도 됨)
-    const kept = allergyList.filter((a) => nextNames.has(a.name));
-    const newly = addedNames.map((name, i) => ({
-      // 임시 로컬 id (서버 저장 전)
+    // 화면 상태 갱신
+    const kept = allergyList.filter((a) => nextAllergyNames.has(a.name));
+    const newly = added.map((name, i) => ({
       allergyId: `temp-${Date.now()}-${i}`,
       name,
     }));
@@ -97,13 +112,15 @@ export default function PreferenceInfo() {
         입맛에 딱 맞는 요리를 추천받을 수 있어요.
       </p>
 
+      {/* 좋아요(재료) */}
       <div className={styles.section}>
         <span className={styles.label}>
-          <LikeIcon className={styles.icon} />
-          좋아요
+          <LikeIcon className={styles.icon} /> 좋아요 재료
         </span>
         <div className={styles.buttonGroup}>
-          {likes.length === 0 ? (
+          {loading ? (
+            <span className={styles.empty}>불러오는 중…</span>
+          ) : likes.length === 0 ? (
             <span className={styles.empty}>없음</span>
           ) : (
             likes.map((name) => (
@@ -115,13 +132,15 @@ export default function PreferenceInfo() {
         </div>
       </div>
 
+      {/* 싫어요(재료) */}
       <div className={styles.section}>
         <span className={styles.label}>
-          <DislikeIcon className={styles.icon} />
-          싫어요
+          <DislikeIcon className={styles.icon} /> 싫어요 재료
         </span>
         <div className={styles.buttonGroup}>
-          {dislikes.length === 0 ? (
+          {loading ? (
+            <span className={styles.empty}>불러오는 중…</span>
+          ) : dislikes.length === 0 ? (
             <span className={styles.empty}>없음</span>
           ) : (
             dislikes.map((name) => (
@@ -133,10 +152,10 @@ export default function PreferenceInfo() {
         </div>
       </div>
 
+      {/* 알레르기(서버) */}
       <div className={styles.section}>
         <span className={styles.label}>
-          <AllergyIcon className={styles.icon} />
-          알레르기
+          <AllergyIcon className={styles.icon} /> 알레르기
         </span>
         <div className={styles.buttonGroup}>
           {loading ? (

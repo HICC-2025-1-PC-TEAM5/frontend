@@ -11,12 +11,6 @@ function loadUserFromStorage() {
     const raw = localStorage.getItem('user');
     if (raw) Object.assign(merged, JSON.parse(raw));
 
-    // 구버전 키(이전 코드 호환)
-    const legacyToken = localStorage.getItem('token');
-    const legacyName = localStorage.getItem('username');
-    if (legacyToken) merged.token = legacyToken;
-    if (legacyName) merged.username = legacyName;
-
     // 정리
     const user = {
       token: merged.token || '',

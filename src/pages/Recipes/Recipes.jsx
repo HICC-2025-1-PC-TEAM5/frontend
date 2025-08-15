@@ -1,36 +1,65 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 import styles from './Recipes.module.css';
 import SelectHeader from './components/SelectHeader';
-import ImageCard from '../../components/ImageCard';
 import Nav from '../../components/Nav';
 import Wrapper from '../../components/Wrapper';
 import Stack from '../../components/Stack';
-import { useUser } from '../UserContext'; // ✅ UserContext 불러오기
 import OptionsInput from '../../components/OptionsInput';
 import RecipeCard from './components/RecipeCard';
-
-const recipes = [
-  { id: 1, imageSrc: '', title: '레시피 1', servings: '1-2' },
-  { id: 2, imageSrc: '', title: '레시피 2', servings: '1-2' },
-  { id: 3, imageSrc: '', title: '레시피 3', servings: '1-2' },
-  { id: 4, imageSrc: '', title: '레시피 4', servings: '1-2' },
-  { id: 5, imageSrc: '', title: '레시피 5', servings: '1-2' },
-  { id: 6, imageSrc: '', title: '레시피 6', servings: '1-2' },
-];
+import { useUser } from '../UserContext';
+import api from '../../lib/api'; // 서버로 직접 호출
+import { buildRecommendParams } from '../../lib/preference';
 
 function Recipes() {
-  const { username } = useUser(); // ✅ 여기 수정
+  const { username, id: ctxUserId } = useUser() || {};
+  const userId = ctxUserId || localStorage.getItem('userId');
   const name = username || '사용자';
   const navigate = useNavigate();
+
   const [sort, setSort] = useState('popular');
+  const [loading, setLoading] = useState(true);
+  const [list, setList] = useState([]);
+  const [error, setError] = useState('');
+
   const handleSortChange = (v) => {
     const next = v?.target ? v.target.value : v;
     setSort(next);
+    // 서버 정렬 지원 시 여기서 다시 요청: params.sort = next
+    fetchRecipes(next);
   };
-  const handleCardClick = (id) => {
-    navigate(`/recipes/${id}`);
-  };
+
+  async function fetchRecipes(sortKey = sort) {
+    try {
+      setLoading(true);
+      setError('');
+      if (!userId) throw new Error('로그인이 필요합니다.');
+
+      // 1) 추천 파라미터 구성(좋아요 재료 + 싫어요/알레르기 재료)
+      const params = await buildRecommendParams(userId);
+      // 옵션: 정렬키 서버가 받는다면 함께 전송
+      if (sortKey) params.sort = sortKey;
+
+      // 2) 서버 추천 호출 (POST, querystring 사용)
+      //    서버가 GET을 원하면 get으로 바꾸고 body 제거
+      const { data } = await api.post(
+        `/api/users/${userId}/recipes`,
+        null,
+        { params } // ?likeIngredients=..&excludeIngredients=..&sort=..
+      );
+
+      setList(data?.recipe || []);
+    } catch (e) {
+      setError(e.message || '레시피를 불러오지 못했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchRecipes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
   return (
     <>
@@ -44,6 +73,7 @@ function Recipes() {
         </Wrapper>
         <div className={styles.headerBlur}></div>
       </div>
+
       <div className={styles.toolbar}>
         <Wrapper>
           <div className={styles.sortBox}>
@@ -54,26 +84,32 @@ function Recipes() {
             >
               <option value="popular">인기순</option>
               <option value="latest">최신순</option>
-              <option value="difficulty">난이도순</option>
             </OptionsInput>
           </div>
         </Wrapper>
       </div>
+
       <div className={styles.recipes}>
         <Wrapper>
-          <Stack className={styles.recipesIndex} rows="2" wrap="wrap">
-            {recipes.map((recipe) => (
-              <Link key={recipe.id} to={`/recipes/${recipe.id}`}>
+          {loading && <div className={styles.state}>불러오는 중…</div>}
+          {!loading && error && <div className={styles.state}>{error}</div>}
+          {!loading && !error && list.length === 0 && (
+            <div className={styles.state}>추천 레시피가 없습니다.</div>
+          )}
+
+          {!loading && !error && list.length > 0 && (
+            <Stack className={styles.recipesIndex} rows="2" wrap="wrap">
+              {list.map((r) => (
                 <RecipeCard
-                  key={recipe.id}
-                  id={recipe.id}
-                  title={recipe.title}
-                  imageSrc={recipe.imageSrc}
-                  servings={recipe.servings}
+                  key={`${r.id}-${r.name}`}
+                  id={r.id}
+                  title={r.name}
+                  imageSrc={r.image}
+                  servings={r.portion}
                 />
-              </Link>
-            ))}
-          </Stack>
+              ))}
+            </Stack>
+          )}
         </Wrapper>
       </div>
 
