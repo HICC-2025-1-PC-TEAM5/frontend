@@ -18,6 +18,8 @@ export default function Main() {
   const { username } = useUser(); // ✅ Context에서 username 가져오기
   const navigate = useNavigate();
 
+  console.log("username: ", username);
+
   const imageData = [
     { id: 1, imageSrc: '', title: '요리1', desc: 'large' },
     { id: 2, imageSrc: '', title: '요리2', desc: 'large' },

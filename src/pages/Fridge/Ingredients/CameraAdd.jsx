@@ -1,4 +1,5 @@
 // src/pages/Fridge/Ingredients/CameraAdd.jsx
+import { useUser } from '../../../pages/UserContext';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import RecognizedSheet from '../components/RecognizedSheet';
@@ -7,9 +8,12 @@ import styles from './CameraAdd.module.css';
 import { extractIngredientsFromReceipt } from '../../../lib/fridge';
 import { addIngredients } from '../../../lib/fridge';
 
+
 export default function CameraAdd() {
+  const { user } = useUser(); // 혹은 useUser()
   const navigate = useNavigate();
   const location = useLocation();
+  
 
   // mode: 'receipt' | 'photo' (쿼리스트링 mode=receipt 지원, 기본 photo)
   const search = new URLSearchParams(location.search);
@@ -21,6 +25,10 @@ export default function CameraAdd() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [items, setItems] = useState([]);
   const [ocrBoxes, setOcrBoxes] = useState([]); // 영수증 모드일 때 박스 표시용(데모)
+
+  
+  const userId = user.id;
+  
 
   useEffect(() => {
     (async () => {
@@ -129,8 +137,8 @@ export default function CameraAdd() {
       // 영수증 모드라면 서버에 업로드하여 인식 결과 받기
       if (mode === 'receipt' && blob) {
         const file = new File([blob], 'receipt.jpg', { type: 'image/jpeg' });
-
-        const userId = import.meta.env.VITE_DEV_USER_ID || '1';
+      
+        //const userId = import.meta.env.VITE_DEV_USER_ID || '1';                    ///////////////////////////////////////////////
         const recognized = await extractIngredientsFromReceipt(userId, file);
         // 서버 응답 예: [{ name, category }, ...]
         const normalized = (recognized || []).map((it) => ({
@@ -163,7 +171,8 @@ export default function CameraAdd() {
   const handleComplete = (finalItems) => {
     (async () => {
       try {
-        const userId = localStorage.getItem('userId');
+        const userId = localStorage.getItem('userId'); ////////////////////////////////////////
+
         if (!userId) throw new Error('사용자 정보가 없습니다');
 
         const withType = finalItems.map((it) => ({

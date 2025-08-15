@@ -4,7 +4,7 @@ import { http, HttpResponse, delay } from 'msw';
 const API = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 const hosts = [
   API, // .env에 지정한 주소 (예: https://localhost:8080)
-  'https://localhost:8080',
+ // 'https://localhost:8080',
   'http://localhost:8080',
   location.origin, // 같은 오리진(/api/.. 로 부르는 경우)
 ].filter(Boolean);

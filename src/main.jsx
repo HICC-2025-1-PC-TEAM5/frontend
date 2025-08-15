@@ -4,6 +4,7 @@ import './master.css';
 import App from './App.jsx';
 import { UserProvider } from './pages/UserContext.jsx'; // 상대경로 확인!
 
+
 async function enableMocks() {
   if (import.meta.env.DEV && import.meta.env.VITE_USE_MOCKS === 'true') {
     try {
