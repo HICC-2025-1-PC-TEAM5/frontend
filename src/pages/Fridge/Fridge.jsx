@@ -1,6 +1,6 @@
 // src/pages/Fridge/Fridge.jsx
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, Link } from 'react-router';
+import { useNavigate, Link } from 'react-router-dom';
 import Button from '../../components/Button';
 import OptionsInput from '../../components/OptionsInput';
 import Nav from '../../components/Nav';
@@ -56,7 +56,9 @@ const normName = (s) =>
 
 export default function Fridge() {
   const navigate = useNavigate();
-  const { id: userIdFromCtx } = useUser();
+  // ✅ useUser() 올바른 사용: 컨텍스트에서 user 객체를 꺼내서 id 참조
+  const { user, isAuthed } = useUser();
+  const userIdFromCtx = user?.id;
 
   // 정렬/데이터
   const [sortOption, setSortOption] = useState('latest');
@@ -70,9 +72,11 @@ export default function Fridge() {
   const [necessaryCoins, setNecessaryCoins] = useState([]);
 
   useEffect(() => {
+    let ignore = false;
     (async () => {
       try {
-        const userId = userIdFromCtx || import.meta.env.VITE_DEV_USER_ID || '1';
+        const userId = userIdFromCtx || import.meta.env.VITE_DEV_USER_ID;
+        if (!userId) return; // 유저 준비 전엔 호출 안 함
 
         // 1) 현재 냉장고 재료 불러오기
         const data = await getIngredients(userId);
@@ -101,16 +105,16 @@ export default function Fridge() {
             subCategory: normalizeCategoryKo(main, it.category),
           };
         });
-        setItems(list);
+        if (!ignore) setItems(list);
 
         // 2) 필수 재료 추천에서 "내 냉장고에 없는" 것만 걸러 코인으로 사용
         const ownedNames = new Set(list.map((it) => normName(it.title)));
-        const necessary = await getNecessaryIngredients(userId); // [{id,name,imageUrl,category,allergy}]
+        const necessary = await getNecessaryIngredients(userId); // 서버: { ingredientList: [...] } -> 함수에서 배열로 반환됨
         const missing = (necessary || []).filter(
           (n) => !ownedNames.has(normName(n.name))
         );
 
-        // UI용 코인 데이터로 매핑
+        // UI용 코인 데이터로 매핑 (클릭 불필요)
         const coins = missing.slice(0, 8).map((n) => ({
           id: n.id,
           imageSrc: n.imageUrl || '',
@@ -118,12 +122,15 @@ export default function Fridge() {
           variant: 'small',
           allergy: !!n.allergy,
         }));
-        setNecessaryCoins(coins);
+        if (!ignore) setNecessaryCoins(coins);
       } catch (e) {
         console.error(e);
         alert('재료 불러오기 실패');
       }
     })();
+    return () => {
+      ignore = true;
+    };
   }, [userIdFromCtx]);
 
   const handleSortChange = (e) => {
@@ -144,10 +151,6 @@ export default function Fridge() {
     }
     return base;
   }, [items, mainCat, subCat, sortOption]);
-
-  const goAddFormPrefilled = (name) => {
-    navigate('/fridge/add/form', { state: { presetName: name } });
-  };
 
   return (
     <>
@@ -179,7 +182,7 @@ export default function Fridge() {
         </div>
       </div>
 
-      {/* 추천 섹션: 필요한 재료(내 냉장고에 없는 것만) 이미지코인 */}
+      {/* 추천 섹션: 필요한 재료(내 냉장고에 없는 것만) 이미지코인 - 클릭 없음 */}
       {necessaryCoins.length > 0 && (
         <div className={styles.recommands}>
           <div className={styles.message}>
@@ -188,12 +191,11 @@ export default function Fridge() {
           <Wrapper>
             <Stack gap="1rem" wrap="wrap">
               {necessaryCoins.map((r) => (
-                <div key={r.id} onClick={() => goAddFormPrefilled(r.text)}>
+                <div key={r.id}>
                   <ImageCoin
                     imageSrc={r.imageSrc}
                     text={r.text}
                     variant={r.variant}
-                    // 알레르기 표시가 필요하면 ImageCoin 내부에 처리하거나 title로 전달
                     titleAttr={r.allergy ? '알레르기 주의' : undefined}
                   />
                 </div>

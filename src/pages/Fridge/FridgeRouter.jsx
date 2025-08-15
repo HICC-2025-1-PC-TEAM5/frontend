@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router';
+import { Routes, Route } from 'react-router-dom';
 import Fridge from './Fridge';
 import Ingredient from './Ingredients/Ingredient';
 import AddForm from './Ingredients/AddForm';
