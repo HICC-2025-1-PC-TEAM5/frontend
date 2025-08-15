@@ -2,15 +2,16 @@
 import axios from 'axios';
 
 /* ===========================
-  기본 설정 / BASE_URL
+  기본 설정 / BASE_URL (뒤 슬래시 제거로 // 방지)
 =========================== */
-const BASE_URL =
+const RAW_BASE =
   import.meta.env.VITE_API_BASE_URL || 'https://cookittoday.duckdns.org';
+const BASE_URL = String(RAW_BASE).replace(/\/+$/, ''); // <- 정규화
 
 /* ===========================
   토큰 스토리지 유틸 (호환 보장)
   - 우선순위: localStorage.user.token → token → accessToken
-  - set 시 user.token 과 accessToken 모두 갱신
+  - set 시 user.token / token / accessToken 모두 갱신
 =========================== */
 function readUserObj() {
   try {
@@ -45,9 +46,9 @@ export function setAccessToken(token) {
   user.token = token;
   writeUserObj(user);
 
-  // 2) accessToken(레거시/타모듈 호환)
+  // 2) 레거시/타모듈 호환 키 갱신
   localStorage.setItem('accessToken', token);
-  localStorage.setItem('token', token); // 레거시 키도 유지
+  localStorage.setItem('token', token);
 }
 
 export function clearAccessToken() {
@@ -88,16 +89,18 @@ api.interceptors.request.use((config) => {
   const token = getAccessToken();
   if (token) {
     config.headers = config.headers || {};
-    config.headers.Authorization = `Bearer ${token}`;
+    if (!config.headers.Authorization) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   return config;
 });
 
 /* ===========================
    응답 인터셉터 (api 전용)
-   - 401이면 /api/auth/refresh 1회 호출 후 원요청 재시도
+   - 401/419이면 /api/auth/refresh 1회 호출 후 원요청 재시도
    - refresh 자신이거나 _skipRefresh === true 면 제외
-   - 동시 401은 refreshPromise로 한번만 처리
+   - 동시 401/419는 refreshPromise로 한번만 처리
 =========================== */
 let refreshPromise = null;
 
@@ -115,7 +118,10 @@ api.interceptors.response.use(
     );
     const skipRefresh = original._skipRefresh === true;
 
-    if (status === 401 && !isRefreshCall && !skipRefresh) {
+    const shouldRefresh =
+      (status === 401 || status === 419) && !isRefreshCall && !skipRefresh;
+
+    if (shouldRefresh) {
       try {
         if (!refreshPromise) {
           refreshPromise = auth.post('/api/auth/refresh');
@@ -151,10 +157,10 @@ api.interceptors.response.use(
 /* ===========================
    fetch 기반 도우미 (선택)
    - FormData면 Content-Type 자동 생략
-   - 401 시 1회 리프레시 후 재시도
+   - 401/419 시 1회 리프레시 후 재시도
    - 옵션:
      - skipAuth: Authorization 헤더 생략
-     - skipRefresh: 401이어도 리프레시/재시도 하지 않음
+     - skipRefresh: 401/419여도 리프레시/재시도 하지 않음
 =========================== */
 export async function apiFetch(
   path,
@@ -173,12 +179,6 @@ export async function apiFetch(
   const token = getAccessToken();
   const isFormData =
     typeof FormData !== 'undefined' && body instanceof FormData;
-
-  const mergedHeaders = {
-    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
-    ...(!skipAuth && token ? { Authorization: `Bearer ${token}` } : {}),
-    ...headers,
-  };
 
   const doFetch = async (accessOverride) => {
     const hdrs = {
@@ -201,8 +201,8 @@ export async function apiFetch(
   try {
     let res = await doFetch();
 
-    // 401 처리 (리프레시 1회)
-    if (res.status === 401 && !skipRefresh) {
+    // 401/419 처리 (리프레시 1회)
+    if ((res.status === 401 || res.status === 419) && !skipRefresh) {
       try {
         const r = await auth.post('/api/auth/refresh');
         const newAccess =

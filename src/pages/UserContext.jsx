@@ -40,12 +40,14 @@ function persistUser(next) {
     // 레거시 키 정리
     localStorage.removeItem('token');
     localStorage.removeItem('username');
+    localStorage.removeItem('userId');
     return;
   }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   // 레거시 키도 함께 써서 하위 코드 안전
   if (next.token) localStorage.setItem('token', next.token);
   if (next.username) localStorage.setItem('username', next.username);
+  if (next.id) localStorage.setItem('userId', String(next.id));
 }
 
 export function UserProvider({ children }) {

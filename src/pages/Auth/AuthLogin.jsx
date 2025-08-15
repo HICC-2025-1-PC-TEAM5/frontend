@@ -19,7 +19,7 @@ export default function AuthLogin() {
     console.log(12345);
 
     if (access) {
-      login({ token: access, username: '사용자' }); // username은 임시, 필요 시 서버에서 가져오세요
+      login(access, { username: '사용자' }); // username은 임시, 필요 시 서버에서 가져오세요
       params.delete('access');
       const clean = params.toString();
       const newUrl = `${location.pathname}${clean ? `?${clean}` : ''}${location.hash || ''}`;

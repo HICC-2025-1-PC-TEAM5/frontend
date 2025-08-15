@@ -4,12 +4,16 @@ import { useNavigate, useLocation } from 'react-router';
 import RecognizedSheet from '../components/RecognizedSheet';
 import Button from '../../../components/Button';
 import styles from './CameraAdd.module.css';
-import { extractIngredientsFromReceipt } from '../../../lib/fridge';
-import { addIngredients } from '../../../lib/fridge';
+import {
+  extractIngredientsFromReceipt,
+  addIngredients,
+} from '../../../lib/fridge';
+import { useUser } from '../../UserContext';
 
 export default function CameraAdd() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { id: userId, token, isAuthed } = useUser();
 
   // mode: 'receipt' | 'photo' (쿼리스트링 mode=receipt 지원, 기본 photo)
   const search = new URLSearchParams(location.search);
@@ -21,6 +25,17 @@ export default function CameraAdd() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [items, setItems] = useState([]);
   const [ocrBoxes, setOcrBoxes] = useState([]); // 영수증 모드일 때 박스 표시용(데모)
+
+  // ✅ 유저 인증 체크: 없으면 안내 후 뒤로가기(또는 로그인 이동)
+  useEffect(() => {
+    if (!isAuthed || !userId || !token) {
+      alert(
+        '로그인 정보가 없어 촬영을 진행할 수 없어요. 로그인 후 다시 시도해주세요.'
+      );
+      navigate('/login', { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthed, userId, token]);
 
   useEffect(() => {
     (async () => {
@@ -130,7 +145,7 @@ export default function CameraAdd() {
       if (mode === 'receipt' && blob) {
         const file = new File([blob], 'receipt.jpg', { type: 'image/jpeg' });
 
-        const userId = import.meta.env.VITE_DEV_USER_ID || '1';
+        // ✅ 컨텍스트에서 받은 userId 사용 (DEV 하드코딩 제거)
         const recognized = await extractIngredientsFromReceipt(userId, file);
         // 서버 응답 예: [{ name, category }, ...]
         const normalized = (recognized || []).map((it) => ({
@@ -160,10 +175,10 @@ export default function CameraAdd() {
   const centerTitle = mode === 'receipt' ? '영수증 인식' : '사진 촬영';
 
   const handleClose = () => setSheetOpen(false);
+
   const handleComplete = (finalItems) => {
     (async () => {
       try {
-        const userId = localStorage.getItem('userId');
         if (!userId) throw new Error('사용자 정보가 없습니다');
 
         const withType = finalItems.map((it) => ({
