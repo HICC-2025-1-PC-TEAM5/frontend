@@ -9,8 +9,9 @@ import Stack from '../../components/Stack';
 import OptionsInput from '../../components/OptionsInput';
 import RecipeCard from './components/RecipeCard';
 import { useUser } from '../UserContext';
-import api from '../../lib/api'; // 서버로 직접 호출
+import api from '../../lib/api';
 import { buildRecommendParams } from '../../lib/preference';
+import {} from /* optional: getIngredients */ '../../lib/fridge'; // 안 써도 되지만 참고용
 
 function Recipes() {
   const { username, id: ctxUserId } = useUser() || {};
@@ -29,20 +30,57 @@ function Recipes() {
     fetchRecipes(next);
   };
 
+  // 어떤 입력이 와도 문자열 배열로 정규화
+  const toArray = (v) =>
+    Array.isArray(v)
+      ? v.map(String)
+      : v
+        ? String(v)
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [];
+
+  // 냉장고 재료 이름 로드 → ["감자","고구마",...]
+  async function fetchFridgeNames(uid) {
+    try {
+      const { data } = await api.get(`/api/users/${uid}/fridge/ingredients`);
+      // 다양한 응답 스키마 방어
+      const arr =
+        (Array.isArray(data) && data) ||
+        data?.refrigeratorIngredient ||
+        data?.ingredients ||
+        [];
+      const names = (arr || []).map((it) => it?.name).filter(Boolean);
+      // 중복 제거
+      return Array.from(new Set(names));
+    } catch {
+      return [];
+    }
+  }
+
   async function fetchRecipes(sortKey = sort) {
     try {
       setLoading(true);
       setError('');
       if (!userId) throw new Error('로그인이 필요합니다.');
 
-      // 1) 추천 파라미터 구성
-      const params = await buildRecommendParams(userId);
-      if (sortKey) params.sort = sortKey;
+      // 1) 냉장고 재료 이름 추출
+      const fridgeNames = await fetchFridgeNames(userId);
 
-      // 2) GET + querystring으로 호출 (415 방지)
-      const { data } = await api.get(`/api/users/${userId}/recipes`, {
-        params,
-      });
+      // 2) 폴백: 냉장고가 비면 선호 재료(좋아요) 사용
+      let bodyArray = fridgeNames;
+      if (!bodyArray.length) {
+        const built = await buildRecommendParams(userId);
+        bodyArray = toArray(built?.likeIngredients);
+      }
+
+      //    정렬은 쿼리스트링으로 전달
+      const { data } = await api.post(
+        `/api/users/${userId}/recipes`,
+        bodyArray,
+        { params: sortKey ? { sort: sortKey } : {} }
+      );
 
       setList(Array.isArray(data?.recipe) ? data.recipe : []);
     } catch (e) {
