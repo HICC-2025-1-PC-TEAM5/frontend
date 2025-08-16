@@ -75,11 +75,17 @@ function Recipes() {
         bodyArray = toArray(built?.likeIngredients);
       }
 
+      console.log(bodyArray);
+
       //    정렬은 쿼리스트링으로 전달
       const { data } = await api.post(
         `/api/users/${userId}/recipes`,
-        bodyArray,
-        { params: sortKey ? { sort: sortKey } : {} }
+        JSON.stringify(bodyArray), // JSON 문자열로 변환
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
       );
 
       setList(Array.isArray(data?.recipe) ? data.recipe : []);

@@ -1,0 +1,67 @@
+.container {
+    padding: 16px;
+  }
+  
+  h2 {
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+  
+  p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 16px;
+  }
+  
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  
+  .row input[type="text"] {
+    flex: 2;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .quantity {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .quantity button {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #ccc;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .quantity span {
+    width: 24px;
+    text-align: center;
+  }
+  
+  select {
+    padding: 6px 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+  
+  .actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  
