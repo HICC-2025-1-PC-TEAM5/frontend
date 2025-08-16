@@ -1,3 +1,4 @@
+// src/pages/Recipes/Recipes.jsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import styles from './Recipes.module.css';
@@ -8,8 +9,9 @@ import Stack from '../../components/Stack';
 import OptionsInput from '../../components/OptionsInput';
 import RecipeCard from './components/RecipeCard';
 import { useUser } from '../UserContext';
-import api from '../../lib/api'; // 서버로 직접 호출
+import api from '../../lib/api';
 import { buildRecommendParams } from '../../lib/preference';
+import { /* optional: getIngredients */ } from '../../lib/fridge'; // 안 써도 되지만 참고용
 
 function Recipes() {
   const { username, id: ctxUserId } = useUser() || {};
@@ -25,9 +27,32 @@ function Recipes() {
   const handleSortChange = (v) => {
     const next = v?.target ? v.target.value : v;
     setSort(next);
-    // 서버 정렬 지원 시 여기서 다시 요청: params.sort = next
     fetchRecipes(next);
   };
+
+  // 어떤 입력이 와도 문자열 배열로 정규화
+  const toArray = (v) =>
+    Array.isArray(v)
+      ? v.map(String)
+      : (v ? String(v).split(',').map(s => s.trim()).filter(Boolean) : []);
+
+  // 냉장고 재료 이름 로드 → ["감자","고구마",...]
+  async function fetchFridgeNames(uid) {
+    try {
+      const { data } = await api.get(`/api/users/${uid}/fridge/ingredients`);
+      // 다양한 응답 스키마 방어
+      const arr =
+        (Array.isArray(data) && data) ||
+        data?.refrigeratorIngredient ||
+        data?.ingredients ||
+        [];
+      const names = (arr || []).map((it) => it?.name).filter(Boolean);
+      // 중복 제거
+      return Array.from(new Set(names));
+    } catch {
+      return [];
+    }
+  }
 
   async function fetchRecipes(sortKey = sort) {
     try {
@@ -35,22 +60,33 @@ function Recipes() {
       setError('');
       if (!userId) throw new Error('로그인이 필요합니다.');
 
-      // 1) 추천 파라미터 구성(좋아요 재료 + 싫어요/알레르기 재료)
-      const params = await buildRecommendParams(userId);
-      // 옵션: 정렬키 서버가 받는다면 함께 전송
-      if (sortKey) params.sort = sortKey;
+      // 1) 냉장고 재료 이름 추출
+      const fridgeNames = await fetchFridgeNames(userId);
 
-      // 2) 서버 추천 호출 (POST, querystring 사용)
-      //    서버가 GET을 원하면 get으로 바꾸고 body 제거
+      // 2) 폴백: 냉장고가 비면 선호 재료(좋아요) 사용
+      let bodyArray = fridgeNames;
+      if (!bodyArray.length) {
+        const built = await buildRecommendParams(userId);
+        bodyArray = toArray(built?.likeIngredients);
+      }
+
+      console.log(bodyArray);
+      
+      //    정렬은 쿼리스트링으로 전달
       const { data } = await api.post(
         `/api/users/${userId}/recipes`,
-        null,
-        { params } // ?likeIngredients=..&excludeIngredients=..&sort=..
+        JSON.stringify(bodyArray), // JSON 문자열로 변환
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
 
-      setList(data?.recipe || []);
+      setList(Array.isArray(data?.recipe) ? data.recipe : []);
     } catch (e) {
-      setError(e.message || '레시피를 불러오지 못했습니다.');
+      setList([]);
+      setError(e?.message || '레시피를 불러오지 못했습니다.');
     } finally {
       setLoading(false);
     }

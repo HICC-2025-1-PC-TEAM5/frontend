@@ -6,6 +6,7 @@ import Button from '../../../components/Button';
 import styles from './CameraAdd.module.css';
 import {
   extractIngredientsFromReceipt,
+  extractIngredientsFromImage,
   addIngredients,
 } from '../../../lib/fridge';
 import { useUser } from '../../UserContext';
@@ -21,17 +22,16 @@ export default function CameraAdd() {
 
   const videoRef = useRef(null);
   const streamRef = useRef(null);
+  const thumbUrlRef = useRef(null); // ObjectURL 정리용
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [items, setItems] = useState([]);
   const [ocrBoxes, setOcrBoxes] = useState([]); // 영수증 모드일 때 박스 표시용(데모)
 
-  // ✅ 유저 인증 체크: 없으면 안내 후 뒤로가기(또는 로그인 이동)
+  // ✅ 유저 인증 체크
   useEffect(() => {
     if (!isAuthed || !userId || !token) {
-      alert(
-        '로그인 정보가 없어 촬영을 진행할 수 없어요. 로그인 후 다시 시도해주세요.'
-      );
+      alert('로그인 정보가 없어 촬영을 진행할 수 없어요. 로그인 후 다시 시도해주세요.');
       navigate('/login', { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -52,8 +52,7 @@ export default function CameraAdd() {
 
           // 메타데이터가 로드되어 videoWidth/Height 확보될 때까지 대기
           await new Promise((res) => {
-            if (v.readyState >= 1 && (v.videoWidth || v.videoHeight))
-              return res();
+            if (v.readyState >= 1 && (v.videoWidth || v.videoHeight)) return res();
             const onLoaded = () => {
               v.removeEventListener('loadedmetadata', onLoaded);
               res();
@@ -64,36 +63,12 @@ export default function CameraAdd() {
           await v.play();
         }
 
-        // 영수증 모드면 데모용 OCR 박스 몇 개 보여주기
+        // 영수증 모드면 데모용 OCR 박스 표시
         if (mode === 'receipt') {
           setOcrBoxes([
-            {
-              position: 'absolute',
-              top: '35%',
-              left: '12%',
-              width: '76%',
-              height: '6%',
-              border: '2px solid #00FFAA',
-              borderRadius: '8px',
-            },
-            {
-              position: 'absolute',
-              top: '45%',
-              left: '12%',
-              width: '76%',
-              height: '6%',
-              border: '2px solid #00FFAA',
-              borderRadius: '8px',
-            },
-            {
-              position: 'absolute',
-              top: '55%',
-              left: '12%',
-              width: '76%',
-              height: '6%',
-              border: '2px solid #00FFAA',
-              borderRadius: '8px',
-            },
+            { position: 'absolute', top: '35%', left: '12%', width: '76%', height: '6%', border: '2px solid #00FFAA', borderRadius: '8px' },
+            { position: 'absolute', top: '45%', left: '12%', width: '76%', height: '6%', border: '2px solid #00FFAA', borderRadius: '8px' },
+            { position: 'absolute', top: '55%', left: '12%', width: '76%', height: '6%', border: '2px solid #00FFAA', borderRadius: '8px' },
           ]);
         } else {
           setOcrBoxes([]);
@@ -105,8 +80,11 @@ export default function CameraAdd() {
       }
     })();
 
-    // 언마운트 시 카메라 정지
-    return () => streamRef.current?.getTracks()?.forEach((t) => t.stop());
+    // 언마운트: 카메라/URL 정리
+    return () => {
+      streamRef.current?.getTracks()?.forEach((t) => t.stop());
+      if (thumbUrlRef.current) URL.revokeObjectURL(thumbUrlRef.current);
+    };
   }, [navigate, mode]);
 
   const handleCapture = async () => {
@@ -114,7 +92,6 @@ export default function CameraAdd() {
       const video = videoRef.current;
       if (!video) return;
 
-      // videoWidth/Height가 0일 수 있어 fallback 지정
       const vw = video.videoWidth || 1080;
       const vh = video.videoHeight || 1080;
 
@@ -124,14 +101,12 @@ export default function CameraAdd() {
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, vw, vh);
 
-      const blob = await new Promise((res) =>
-        canvas.toBlob(res, 'image/jpeg', 0.9)
-      );
-      const thumb = blob
-        ? URL.createObjectURL(blob)
-        : canvas.toDataURL('image/jpeg');
+      const blob = await new Promise((res) => canvas.toBlob(res, 'image/jpeg', 0.9));
+      if (thumbUrlRef.current) URL.revokeObjectURL(thumbUrlRef.current);
+      const thumb = blob ? URL.createObjectURL(blob) : canvas.toDataURL('image/jpeg');
+      if (blob) thumbUrlRef.current = thumb;
 
-      // 기본 아이템(사진 모드): 로컬에서 바로 1개 생성
+      // 기본 베이스(응답 없을 경우 대비)
       const baseItem = {
         id: crypto?.randomUUID?.() || Math.random().toString(36).slice(2),
         name: mode === 'receipt' ? '...' : '촬영한 재료',
@@ -141,16 +116,24 @@ export default function CameraAdd() {
         thumb,
       };
 
-      // 영수증 모드라면 서버에 업로드하여 인식 결과 받기
-      if (mode === 'receipt' && blob) {
-        const file = new File([blob], 'receipt.jpg', { type: 'image/jpeg' });
+      // ===== 서버 인식 분기 =====
+      if (blob) {
+        const fileName = mode === 'receipt' ? 'receipt.jpg' : 'ingredient.jpg';
+        const file = new File([blob], fileName, { type: 'image/jpeg' });
 
-        // ✅ 컨텍스트에서 받은 userId 사용 (DEV 하드코딩 제거)
-        const recognized = await extractIngredientsFromReceipt(userId, file);
-        // 서버 응답 예: [{ name, category }, ...]
+        let recognized = [];
+        if (mode === 'receipt') {
+          // 영수증 → 기존 엔드포인트
+          recognized = await extractIngredientsFromReceipt(userId, file); // [{name, category}, ...]
+          // 참고: 이 경로는 기존 코드에서 이미 사용 중【】
+        } else {
+          // 사진 → 이미지 인식 엔드포인트
+          recognized = await extractIngredientsFromImage({ userId, token, file }); // [{name, category}, ...] 기대【】
+        }
+
         const normalized = (recognized || []).map((it) => ({
           id: crypto?.randomUUID?.() || Math.random().toString(36).slice(2),
-          name: it.name,
+          name: it.name || '이름 미상',
           category: it.category,
           qty: 1,
           unit: '개',
@@ -158,10 +141,9 @@ export default function CameraAdd() {
           thumb,
         }));
 
-        // 응답 없으면 기본 아이템만, 있으면 응답으로 대체
         setItems(normalized.length ? normalized : [baseItem]);
       } else {
-        // 사진 모드: 기본 아이템만 추가
+        // blob 생성 실패 시: 기본 아이템
         setItems([baseItem]);
       }
 
@@ -185,8 +167,8 @@ export default function CameraAdd() {
           ...it,
           type: it.type || '냉장고',
         }));
-        await addIngredients(userId, withType);
-
+        const text = await addIngredients(userId, withType);
+        
         alert('재료가 등록됐어요');
         navigate(-1);
       } catch (err) {
@@ -194,8 +176,7 @@ export default function CameraAdd() {
         else if (err.status === 401) alert('로그인이 필요합니다');
         else if (err.status === 403) alert('권한이 없습니다');
         else if (err.status === 404) alert('요청 대상이 없습니다');
-        else if (err.status === 408)
-          alert('요청 시간이 초과됐습니다 다시 시도해주세요');
+        else if (err.status === 408) alert('요청 시간이 초과됐습니다 다시 시도해주세요');
         else alert(err.message || '알 수 없는 오류입니다');
         console.error(err);
       }
@@ -214,18 +195,12 @@ export default function CameraAdd() {
 
       {/* 카메라 미리보기 */}
       <div className={styles.cameraWrap}>
-        <video
-          ref={videoRef}
-          className={styles.video}
-          playsInline
-          muted
-          autoPlay
-        />
+        <video ref={videoRef} className={styles.video} playsInline muted autoPlay />
         <div className={styles.mask}>
           <div className={styles.frame} />
           <p className={styles.help}>{centerTitle}</p>
 
-          {/* 영수증 모드일 때만 OCR 박스 표시 (인라인 스타일로 안전하게) */}
+          {/* 영수증 모드일 때만 OCR 박스 표시 */}
           {mode === 'receipt' &&
             ocrBoxes.map((b, i) => <span key={i} style={b} aria-hidden />)}
         </div>
@@ -233,34 +208,17 @@ export default function CameraAdd() {
 
       {/* 모드 탭 (표시만; 쿼리스트링으로 활성화) */}
       <div className={styles.modeTabs}>
-        <span
-          className={`${styles.mode} ${mode === 'receipt' ? styles.active : ''}`}
-        >
-          영수증 인식
-        </span>
-        <span
-          className={`${styles.mode} ${mode === 'photo' ? styles.active : ''}`}
-        >
-          사진 촬영
-        </span>
+        <span className={`${styles.mode} ${mode === 'receipt' ? styles.active : ''}`}>영수증 인식</span>
+        <span className={`${styles.mode} ${mode === 'photo' ? styles.active : ''}`}>사진 촬영</span>
       </div>
 
       {/* 셔터 버튼 */}
       <div className={styles.shutterWrap}>
-        <button
-          className={styles.shutter}
-          onClick={handleCapture}
-          aria-label="촬영"
-        />
+        <button className={styles.shutter} onClick={handleCapture} aria-label="촬영" />
       </div>
 
       {/* 인식 결과 시트 */}
-      <RecognizedSheet
-        open={sheetOpen}
-        items={items}
-        onClose={handleClose}
-        onComplete={handleComplete}
-      />
+      <RecognizedSheet open={sheetOpen} items={items} onClose={handleClose} onComplete={handleComplete} />
     </>
   );
 }

@@ -1,6 +1,6 @@
 import api from './api';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-
+const API = 'http://localhost:8080';
 /* ---------------- 공통 에러 ---------------- */
 function toReadableError(err) {
   if (err?.response) {
@@ -29,7 +29,7 @@ function toReadableError(err) {
 /* 서버 명세가 있는 경우 유지(선택). 지금은 재료 중심으로 쓰지 않으면 생략 가능 */
 export async function getPreferences(userId) {
   try {
-    const { data } = await api.get(`/api/users/${userId}/preference`);
+    const { data } = await api.get(`${API}/api/users/${userId}/preference`);
     return data; // { like: [...], dislike: [...] }
   } catch (err) {
     toReadableError(err);
@@ -39,7 +39,7 @@ export async function getPreferences(userId) {
 export async function addPreference(userId, { recipeId, type }) {
   try {
     // ✅ GET → POST로 수정
-    const { data } = await api.post(`/api/users/${userId}/preference`, {
+    const { data } = await api.post(`${API}/api/users/${userId}/preference`, {
       recipeId,
       type, // "좋아요" | "싫어요"
     });
@@ -51,7 +51,7 @@ export async function addPreference(userId, { recipeId, type }) {
 
 export async function deletePreference(userId, id) {
   try {
-    const { data } = await api.delete(`/api/users/${userId}/preference`, {
+    const { data } = await api.delete(`${API}/api/users/${userId}/preference`, {
       data: { id }, // axios.delete body는 config.data로
     });
     return data; // { message: "OK" }
@@ -63,7 +63,7 @@ export async function deletePreference(userId, id) {
 /* ---------------- (서버) 알레르기 ---------------- */
 export async function getAllergies(userId) {
   try {
-    const res = await api.get(`/api/users/${userId}/preference/allergy`);
+    const res = await api.get(`${API}/api/users/${userId}/preference/allergy`);
     return res.data?.allergyList ?? [];
   } catch (err) {
     toReadableError(err);
@@ -72,7 +72,7 @@ export async function getAllergies(userId) {
 
 export async function addAllergy(userId, ingredientId) {
   try {
-    const res = await api.post(`/api/users/${userId}/preference/allergy`, {
+    const res = await api.post(`${API}/api/users/${userId}/preference/allergy`, {
       ingredientId,
     });
     return res.data;
@@ -84,7 +84,7 @@ export async function addAllergy(userId, ingredientId) {
 export async function removeAllergy(userId, allergyId) {
   try {
     const res = await api.delete(
-      `/api/users/${userId}/preference/allergy/${allergyId}`
+      `${API}/api/users/${userId}/preference/allergy/${allergyId}`
     );
     return res.data;
   } catch (err) {

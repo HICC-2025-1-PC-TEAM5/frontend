@@ -28,22 +28,22 @@ function normalizeLocationKo(type) {
 function normalizeCategoryKo(main, ko) {
   const v = String(ko || '').trim();
   if (main === 'fridge') {
-    if (v === '채소') return 'vegetable';
-    if (v === '과일') return 'fruit';
-    if (v === '고기/해산물') return 'meat';
-    if (v === '계란/유제품') return 'dairy';
-    if (v === '양념/조미료') return 'condiment';
+    if (v === '채소류') return 'vegetable';
+    if (v === '과일류') return 'fruit';
+    if (v === '육류' || v === '어패류') return 'meat';
+    if (v === '달걀/난류' || v === '유제품') return 'dairy';
+    if (v === '조미료/향신료') return 'condiment';
     return 'etc';
   }
   if (main === 'freezer') {
-    if (v === '채소') return 'vegetable';
-    if (v === '과일') return 'fruit';
-    if (v === '고기/해산물') return 'meat';
+    if (v === '채소류') return 'vegetable';
+    if (v === '과일류') return 'fruit';
+    if (v === '육류' || v === '어패류') return 'meat';
     if (v === '가공식품') return 'processed';
     return 'etc';
   }
   // room
-  if (v === '실온채소') return 'room-veg';
+  if (v === '채소류') return 'room-veg';
   if (v === '곡류/건조식품' || v === '곡류/전분류') return 'grain-dried';
   if (v === '조미료/향신료') return 'cond-spice';
   if (v === '가공식품') return 'processed';
