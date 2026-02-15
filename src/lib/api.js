@@ -5,7 +5,7 @@ import axios from 'axios';
   기본 설정 / BASE_URL (뒤 슬래시 제거로 // 방지)
 =========================== */
 const RAW_BASE =
-  import.meta.env.VITE_API_BASE_URL || 'https://cookittoday.duckdns.org';
+  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 const BASE_URL = String(RAW_BASE).replace(/\/+$/, ''); // <- 정규화
 
 /* ===========================

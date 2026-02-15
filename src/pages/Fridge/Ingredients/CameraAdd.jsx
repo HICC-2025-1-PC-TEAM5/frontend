@@ -42,42 +42,17 @@ export default function CameraAdd() {
   useEffect(() => {
     (async () => {
       try {
-        // 해상도/포커스 요구치 ↑
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: { ideal: 'environment' },
-            width: { min: 1280, ideal: 1920, max: 4096 },
-            height: { min: 720, ideal: 1080, max: 2160 },
-            advanced: [{ focusMode: 'continuous' }], // 지원 기기에서만 반영
-          },
+          video: { facingMode: { ideal: 'environment' } },
           audio: false,
         });
         streamRef.current = stream;
-
-        // (선택) 포커스/줌 추가 적용
-        try {
-          const [track] = stream.getVideoTracks();
-          const caps = track.getCapabilities?.() || {};
-          const adv = {};
-          if (caps.focusMode?.length) {
-            adv.focusMode = caps.focusMode.includes('continuous')
-              ? 'continuous'
-              : caps.focusMode[0];
-          }
-          if (caps.zoom) {
-            const mid = (caps.zoom.min + caps.zoom.max) / 3;
-            adv.zoom = Math.min(caps.zoom.max, Math.max(caps.zoom.min, mid));
-          }
-          if (Object.keys(adv).length) {
-            await track.applyConstraints({ advanced: [adv] });
-          }
-        } catch {}
 
         const v = videoRef.current;
         if (v) {
           v.srcObject = stream;
 
-          // 메타데이터 로드까지 대기(영상 크기 확보)
+          // 메타데이터가 로드되어 videoWidth/Height 확보될 때까지 대기
           await new Promise((res) => {
             if (v.readyState >= 1 && (v.videoWidth || v.videoHeight))
               return res();
@@ -91,7 +66,7 @@ export default function CameraAdd() {
           await v.play();
         }
 
-        // 영수증 모드면 OCR 박스 데모 표시
+        // 영수증 모드면 데모용 OCR 박스 표시
         if (mode === 'receipt') {
           setOcrBoxes([
             {
@@ -144,55 +119,23 @@ export default function CameraAdd() {
       const video = videoRef.current;
       if (!video) return;
 
-      const [track] = streamRef.current?.getVideoTracks?.() ?? [];
-      let blob = null;
+      const vw = video.videoWidth || 1080;
+      const vh = video.videoHeight || 1080;
 
-      // 1) 가능하면 ImageCapture로 고해상도 스틸 추출
-      if (track && 'ImageCapture' in window) {
-        try {
-          const ic = new ImageCapture(track);
-          blob = await ic.takePhoto(); // 보통 image/jpeg, 최대 해상도
-        } catch {
-          // 실패 시 폴백으로 진행
-        }
-      }
+      const canvas = document.createElement('canvas');
+      canvas.width = vw;
+      canvas.height = vh;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, vw, vh);
 
-      // 2) 폴백: 트랙 설정 해상도로 캔버스 스냅샷(품질↑)
-      if (!blob) {
-        const s = track?.getSettings?.() || {};
-        const cw = s.width || video.videoWidth || 1920;
-        const ch = s.height || video.videoHeight || 1080;
-
-        const canvas = document.createElement('canvas');
-        canvas.width = cw;
-        canvas.height = ch;
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        ctx.drawImage(video, 0, 0, cw, ch);
-        blob = await new Promise((res) =>
-          canvas.toBlob(res, 'image/jpeg', 0.98)
-        );
-      }
-
-      // 썸네일(ObjectURL). 생성 실패 시 원본으로 대체
+      const blob = await new Promise((res) =>
+        canvas.toBlob(res, 'image/jpeg', 0.9)
+      );
       if (thumbUrlRef.current) URL.revokeObjectURL(thumbUrlRef.current);
-      let thumb = '';
-      try {
-        const bm = await createImageBitmap(blob);
-        const tCanvas = document.createElement('canvas');
-        const maxW = 1024; // 미리보기는 이 정도면 충분
-        const ratio = bm.width / bm.height;
-        tCanvas.width = Math.min(bm.width, maxW);
-        tCanvas.height = Math.round(tCanvas.width / ratio);
-        const tCtx = tCanvas.getContext('2d');
-        tCtx.drawImage(bm, 0, 0, tCanvas.width, tCanvas.height);
-        const tBlob = await new Promise((res) =>
-          tCanvas.toBlob(res, 'image/jpeg', 0.85)
-        );
-        thumb = URL.createObjectURL(tBlob);
-      } catch {
-        thumb = URL.createObjectURL(blob);
-      }
-      thumbUrlRef.current = thumb;
+      const thumb = blob
+        ? URL.createObjectURL(blob)
+        : canvas.toDataURL('image/jpeg');
+      if (blob) thumbUrlRef.current = thumb;
 
       // 기본 베이스(응답 없을 경우 대비)
       const baseItem = {
@@ -204,34 +147,41 @@ export default function CameraAdd() {
         thumb,
       };
 
-      // ===== 서버 인식 =====
-      const isReceipt = mode === 'receipt';
-      const fileExt = blob.type === 'image/png' ? 'png' : 'jpg';
-      const fileName = isReceipt
-        ? `receipt.${fileExt}`
-        : `ingredient.${fileExt}`;
-      const file = new File([blob], fileName, {
-        type: blob.type || 'image/jpeg',
-      });
+      // ===== 서버 인식 분기 =====
+      if (blob) {
+        const fileName = mode === 'receipt' ? 'receipt.jpg' : 'ingredient.jpg';
+        const file = new File([blob], fileName, { type: 'image/jpeg' });
 
-      let recognized = [];
-      if (isReceipt) {
-        recognized = await extractIngredientsFromReceipt(userId, file); // [{name, category}, ...]
+        let recognized = [];
+        if (mode === 'receipt') {
+          // 영수증 → 기존 엔드포인트
+          recognized = await extractIngredientsFromReceipt(userId, file); // [{name, category}, ...]
+          // 참고: 이 경로는 기존 코드에서 이미 사용 중【】
+        } else {
+          // 사진 → 이미지 인식 엔드포인트
+          recognized = await extractIngredientsFromImage({
+            userId,
+            token,
+            file,
+          }); // [{name, category}, ...] 기대【】
+        }
+
+        const normalized = (recognized || []).map((it) => ({
+          id: crypto?.randomUUID?.() || Math.random().toString(36).slice(2),
+          name: it.name || '이름 미상',
+          category: it.category,
+          qty: 1,
+          unit: '개',
+          expire: '',
+          thumb,
+        }));
+
+        setItems(normalized.length ? normalized : [baseItem]);
       } else {
-        recognized = await extractIngredientsFromImage({ userId, token, file }); // [{name, category}, ...]
+        // blob 생성 실패 시: 기본 아이템
+        setItems([baseItem]);
       }
 
-      const normalized = (recognized || []).map((it) => ({
-        id: crypto?.randomUUID?.() || Math.random().toString(36).slice(2),
-        name: it.name || '이름 미상',
-        category: it.category,
-        qty: 1,
-        unit: '개',
-        expire: '',
-        thumb,
-      }));
-
-      setItems(normalized.length ? normalized : [baseItem]);
       setSheetOpen(true);
     } catch (err) {
       console.error(err);
@@ -252,7 +202,7 @@ export default function CameraAdd() {
           ...it,
           type: it.type || '냉장고',
         }));
-        await addIngredients(userId, withType);
+        const text = await addIngredients(userId, withType);
 
         alert('재료가 등록됐어요');
         navigate(-1);

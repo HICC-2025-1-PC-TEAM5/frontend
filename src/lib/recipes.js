@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+const API = 'http://localhost:8080';
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL, // ✅ 오타 수정
   withCredentials: true, // ✅ 세미콜론 → 콤마
@@ -43,7 +44,7 @@ function toReadableError(err) {
 export async function fetchRecommendedRecipes(userId, { sort } = {}) {
   try {
     const { data } = await api.post(
-      `/api/users/${userId}/recipes`,
+      `${API}/api/users/${userId}/recipes`,
       null,
       sort ? { params: { sort } } : undefined
     );
@@ -58,7 +59,7 @@ export async function fetchRecommendedRecipes(userId, { sort } = {}) {
  */
 export async function fetchRecipeDetail(userId, recipeId) {
   try {
-    const { data } = await api.get(`/api/users/${userId}/recipes/${recipeId}`);
+    const { data } = await api.get(`${API}/api/users/${userId}/recipes/${recipeId}`);
     return data;
   } catch (err) {
     toReadableError(err);
@@ -71,7 +72,7 @@ export async function fetchRecipeDetail(userId, recipeId) {
 export async function patchRecipePreference(userId, recipeId, type) {
   try {
     const { data } = await api.patch(
-      `/api/users/${userId}/recipes/${recipeId}`,
+      `${API}/api/users/${userId}/recipes/${recipeId}`,
       { type }
     );
     return data; // { message: "OK" }

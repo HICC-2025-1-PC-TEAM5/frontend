@@ -6,6 +6,7 @@ import Stack from '../../../components/Stack';
 import Button from '../../../components/Button';
 import EditSheet from './EditSheet';
 import styles from './Ingredient.module.css';
+import { useUser } from '../../UserContext';
 
 import {
   patchFridgeQuantity,
@@ -14,6 +15,7 @@ import {
 } from '../../../lib/fridge';
 
 export default function Ingredient() {
+  const { id: userId, token, isAuthed } = useUser();
   const navigate = useNavigate();
   const { id: ingredientIdParam } = useParams(); // URL의 :id (ingredientId로 사용)
   const location = useLocation();
@@ -40,25 +42,27 @@ export default function Ingredient() {
   useEffect(() => {
     const run = async () => {
       try {
-        const userId = localStorage.getItem('userId');
-        const token = localStorage.getItem('token');
         if (!userId || !token) return;
+
+        const refrigeratorId =
+        ingredient.refrigeratorId ||
+        refrigeratorIdFromList ||
+        location.state?.id;
 
         const data = await getIngredientDetail({
           userId,
-          ingredientId: ingredientIdParam,
+          refrigeratorId,
           token,
         });
         // 서버 응답 스키마 예시에 맞춰 매핑
         const ing = data?.ingredient;
         if (ing) {
-          setIngredient((prev) => ({
-            ...prev,
+          setIngredient({
             id: ing.id,
             title: ing.name,
-            quantity: Number(ing.quantity ?? prev.quantity),
-            // unit, allergy 등은 필요 시 추가로 보관
-          }));
+            quantity: Number(ing.quantity ?? 1),
+            unit: ing.unit ?? '개',
+          });
         }
       } catch (e) {
         console.error(e);
@@ -74,8 +78,6 @@ export default function Ingredient() {
   // 수량 수정 완료 → PATCH 호출
   const handleEditSubmit = async (form) => {
     try {
-      const userId = localStorage.getItem('userId');
-      const token = localStorage.getItem('token');
       if (!userId || !token) throw new Error('로그인이 필요합니다.');
 
       // refrigeratorId 확보: state로 안 왔다면 목록/카드에서 함께 넘겨주세요.
@@ -116,8 +118,6 @@ export default function Ingredient() {
     if (!confirm('정말 삭제할까요?')) return;
 
     try {
-      const userId = localStorage.getItem('userId');
-      const token = localStorage.getItem('token');
       if (!userId || !token) throw new Error('로그인이 필요합니다.');
 
       const refrigeratorId =

@@ -9,11 +9,16 @@ import PeopleCounter from '../components/PeopleCounter';
 import Wrapper from '../../../components/Wrapper';
 import Stack from '../../../components/Stack';
 import CookingStep from '../components/CookingStep';
+import api from '../../../lib/api';
+import { useUser } from '../../UserContext';
 import { fetchRecipeDetail } from '../../../lib/recipes';
 import { removeIngredientsByNames } from '../../../lib/fridge'; // ✅ 새 유틸 사용
 
+
+
 export default function Recipe() {
-  const { id } = useParams();
+  const { user, isAuthed, token } = useUser();
+  const { recipeid } = useParams();
   const navigate = useNavigate();
   const handleBack = () => navigate(-1);
 
@@ -30,11 +35,9 @@ export default function Recipe() {
       try {
         setLoading(true);
         setErr('');
-        const userId =
-          localStorage.getItem('userId') ||
-          import.meta.env.VITE_DEV_USER_ID ||
-          '1';
-        const data = await fetchRecipeDetail(userId, id);
+        const userId = user?.id;
+        const data = await fetchRecipeDetail(userId, recipeid);
+        console.log(data);
         setDetail(data);
       } catch (e) {
         setErr(e.message || '레시피 정보를 불러오지 못했습니다.');
@@ -42,7 +45,7 @@ export default function Recipe() {
         setLoading(false);
       }
     })();
-  }, [id]);
+  }, [recipeid]);
 
   const ingredientsYes = useMemo(() => {
     const raw = detail?.recipe?.ingredients || '';
@@ -66,6 +69,7 @@ export default function Recipe() {
       image: s.image,
     }));
   }, [detail]);
+  console.log(steps);
 
   const usedIngredientNames = useMemo(
     () => ingredientsYes.map((i) => i.text).filter(Boolean),
@@ -74,17 +78,36 @@ export default function Recipe() {
 
   const handleStart = () => setShowSteps(true);
 
-  const handleComplete = async () => {
+  const handleComplete = async (e) => {
     try {
+      e?.preventDefault?.(); // form submit 방지
+      console.log('handleComplete 호출됨');
+      console.log('recipeid:', recipeid, 'userId:', user?.id);
+
+      if (!user?.id) {
+        alert('로그인 정보가 없습니다.');
+        return;
+      }
+
+      if (!recipeid) {
+        alert('레시피 ID가 없습니다.');
+        return;
+      }
       setSaving(true);
-      const userId =
-        localStorage.getItem('userId') ||
-        import.meta.env.VITE_DEV_USER_ID ||
-        '1';
-      await removeIngredientsByNames(userId, usedIngredientNames);
+      
+      console.log('recipeid 값:', recipeid);
+      const userId = user?.id;
+      await api.post(`/api/users/${userId}/history`, {
+        recipeId: recipeid // 현재 조리 중인 레시피의 ID
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      //await removeIngredientsByNames(userId, 재료Id, usedIngredientNames); <<근데 레시피에서 쓴 재료 지우는 기능은 아직 서버에서 구현x 추후 보완예정
       navigate('/fridge');
     } catch (e) {
       console.error(e);
+      console.error('상태코드:', e.response?.status);
+      console.error('응답 데이터:', e.response?.data);
       alert('조리 완료 처리 중 오류가 발생했어요.');
     } finally {
       setSaving(false);
@@ -184,7 +207,7 @@ export default function Recipe() {
                 <CookingStep
                   key={s.step}
                   stepNumber={s.step} // ✅ 이름 맞춰 전달
-                  title={s.title}
+                  //title={s.title}
                   description={s.desc}
                 />
               ))

@@ -5,6 +5,7 @@ import OptionsInput from '../../../components/OptionsInput';
 import PeopleCounter from '../../Recipes/components/PeopleCounter';
 import styles from './EditSheet.module.css';
 
+
 export default function EditSheet({
   open = false,
   initial = {

@@ -14,6 +14,7 @@ export default function AddForm() {
   const goReceipt = () =>
     navigate('/fridge/ingredients/add/camera?mode=receipt');
   const goPhoto = () => navigate('/fridge/ingredients/add/camera?mode=photo');
+  const goHand = () => navigate('/fridge/ingredients/add/hand');
 
   return (
     <>
@@ -61,7 +62,7 @@ export default function AddForm() {
             </p>
           </button>
 
-          <button className={styles.card}>
+          <button className={styles.card} onClick={goHand}>
             <TextIcon className={styles.icon} />
             <h3 className={styles.cardTitle}>직접 입력</h3>
             <p className={styles.cardDesc}>

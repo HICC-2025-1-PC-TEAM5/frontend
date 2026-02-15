@@ -5,6 +5,7 @@ import CategorySelect from '../components/CategorySelect';
 import Button from '../../../components/Button';
 import styles from './EditList.module.css';
 import { getIngredients, deleteFridgeIngredient } from '../../../lib/fridge';
+import { useUser } from '../../UserContext';
 
 // 보관위치 정규화: '냉장/냉장실' → 'fridge' 등
 function normalizeLocation(loc = '') {
@@ -45,6 +46,7 @@ function normalizeCategoryKo(mainCat, raw) {
 }
 
 export default function EditList() {
+  const { id: userId, token, isAuthed } = useUser();
   const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [selected, setSelected] = useState(new Set());
@@ -56,7 +58,6 @@ export default function EditList() {
   useEffect(() => {
     (async () => {
       try {
-        const userId = import.meta.env.VITE_DEV_USER_ID || '1';
         const data = await getIngredients(userId);
         const raw = Array.isArray(data)
           ? data

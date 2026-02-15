@@ -1,6 +1,7 @@
 // src/lib/fridge.js
 import api, { apiFetch } from './api';
 
+const API = 'http://localhost:8080';
 /* ---------------- 공통 ---------------- */
 function authHeaders(token) {
   return {
@@ -28,7 +29,7 @@ export async function extractIngredientsFromReceipt(userId, file) {
   const form = new FormData();
   form.append('image', file);
   const res = await api.post(
-    `/api/users/${userId}/fridge/receipt-to-ingredients`,
+    `${API}/api/users/${userId}/fridge/receipt-to-ingredients`,
     form // axios가 boundary 포함 Content-Type 자동 설정
   );
   // 서버: [{ name, category }, ...]
@@ -42,7 +43,7 @@ export async function extractIngredientsFromImage({
   file,
   timeoutMs = 30000,
 }) {
-  const url = `/api/users/${userId}/fridge/image-to-ingredients`;
+  const url = `${API}/api/users/${userId}/fridge/image-to-ingredients`;
   const form = new FormData();
   form.append('image', file);
 
@@ -91,7 +92,7 @@ export async function extractIngredientsFromImage({
 
 // 냉장고 재료 조회
 export async function getIngredients(userId) {
-  const res = await api.get(`/api/users/${userId}/fridge/ingredients`);
+  const res = await api.get(`${API}/api/users/${userId}/fridge/ingredients`);
   // 서버: { refrigeratorIngredient: [...] }
   return res.data;
 }
@@ -146,8 +147,8 @@ export async function patchFridgeQuantity({
 }
 
 // 재료 상세 조회 (GET) - 냉장고 보유 품목 상세
-export async function getIngredientDetail({ userId, ingredientId, token }) {
-  return apiFetch(`/api/users/${userId}/fridge/ingredients/${ingredientId}`, {
+export async function getIngredientDetail({ userId, refrigeratorId, token }) {
+  return apiFetch(`/api/users/${userId}/fridge/ingredients/${refrigeratorId}`, {
     method: 'GET',
     headers: authHeaders(token),
   });
@@ -172,14 +173,16 @@ export async function removeIngredient(userId, ingredientId) {
   return res.data;
 }
 
-export async function removeIngredientsByNames(userId, names = []) {
+export async function removeIngredientsByNames(userId, ingredientId, names = []) {
   const clean = names.map((n) => String(n).trim()).filter(Boolean);
   if (!clean.length) return { ok: true, deleted: [] };
 
   // 1) 서버가 배치 삭제를 지원하면 우선 사용
   try {
+    
+
     const res = await api.delete(
-      `/api/users/${userId}/fridge/ingredients/by-names`,
+      `/api/users/${userId}/fridge/ingredients/${ingredientId}`,
       { data: { names: clean } }
     );
     return res.data; // { ok, deleted: [...] } 가정

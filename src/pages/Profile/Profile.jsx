@@ -9,6 +9,7 @@ import Stack from '../../components/Stack';
 import Wrapper from '../../components/Wrapper';
 import ProfileHeader from './components/ProfileHeader';
 import { useSavedRecipes } from '../Recipes/SavedRecipesContext';
+import RecipeHistory from "./components/RecipeHistory";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -74,6 +75,13 @@ export default function Profile() {
                 </button>
               ))
             )}
+          </div>
+        {/* 요리 기록 추가 */}
+        <h3 className={styles.recommendTitle} style={{ marginTop: '2rem' }}>
+            요리 기록
+          </h3>
+          <div className={styles.content}>
+            <RecipeHistory />
           </div>
         </Wrapper>
       </div>

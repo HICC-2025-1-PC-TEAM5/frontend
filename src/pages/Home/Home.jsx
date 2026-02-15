@@ -12,19 +12,19 @@ import IconC from '../../assets/svg/Recipe/iconC.svg?react';
 import IconG from '../../assets/svg/Recipe/iconG.svg?react';
 import IconD from '../../assets/svg/Recipe/iconD.svg?react';
 import IconF from '../../assets/svg/Recipe/iconF.svg?react';
-import { useUser } from '../UserContext'; // ✅ Context 불러오기
+import { useUser } from '../UserContext';
 
 export default function Main() {
   const { username } = useUser(); // ✅ Context에서 username 가져오기
   const navigate = useNavigate();
 
   const imageData = [
-    { id: 1, imageSrc: '', title: '요리1', desc: 'large' },
-    { id: 2, imageSrc: '', title: '요리2', desc: 'large' },
-    { id: 3, imageSrc: '', title: '요리3', desc: 'large' },
-    { id: 4, imageSrc: '', title: '요리4', desc: 'large' },
-    { id: 5, imageSrc: '', title: '요리5', desc: 'large' },
-    { id: 6, imageSrc: '', title: '요리6', desc: 'large' },
+    { id: 25, imageSrc: 'http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00508_2.png', title: '햄버거스테이크', desc: 'large' },
+    { id: 2, imageSrc: 'http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00087_2.png', title: '스트로베리 샐러드', desc: 'large' },
+    { id: 3, imageSrc: 'http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00009_2.png	', title: '오색지라시 스시', desc: 'large' },
+    { id: 4, imageSrc: 'http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00091_2.png', title: '버섯구이와 두부타르타르 소스', desc: 'large' },
+    { id: 5, imageSrc: 'http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00089_2.png', title: '시금치 우유 소스와 그린매쉬드포테이토', desc: 'large' },
+    { id: 6, imageSrc: 'http://www.foodsafetykorea.go.kr/uploadimg/cook/10_00093_2.png', title: '구운채소와 간장레몬 소스', desc: 'large' },
   ];
 
   const handleCardClick = (id) => {
