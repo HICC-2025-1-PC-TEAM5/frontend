@@ -6,7 +6,7 @@ import axios from 'axios';
 =========================== */
 const RAW_BASE =
   import.meta.env.VITE_API_BASE_URL || 'https://cookittoday.duckdns.org';
-const BASE_URL = String(RAW_BASE).replace(/\/+$/, ''); // <- 정규화
+export const BASE_URL = String(RAW_BASE).replace(/\/+$/, ''); // <- 정규화 (C7: 로그인 리다이렉트 주소에도 사용)
 
 /* ===========================
   토큰 스토리지 유틸 (호환 보장)

@@ -33,56 +33,21 @@ export async function extractIngredientsFromReceipt(userId, file) {
   return res.data;
 }
 
-// (유지) 사진에서 재료 추출하기 (일반 이미지)
+// 사진에서 재료 추출하기 (일반 이미지)
+// 공용 apiFetch 사용: VITE_API_BASE_URL 기준 주소, Bearer 자동 첨부, 401/419 시 refresh 후 재시도,
+// 오류는 err.status(타임아웃 408)로 전달 (C6). 인식은 오래 걸릴 수 있어 타임아웃 30초
 export async function extractIngredientsFromImage({
   userId,
-  token,
   file,
   timeoutMs = 30000,
 }) {
-  const url = `/api/users/${userId}/fridge/image-to-ingredients`;
   const form = new FormData();
   form.append('image', file);
-
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` }, // FormData일 땐 Content-Type 설정 금지
-      body: form,
-      signal: controller.signal,
-    });
-    if (!res.ok) {
-      switch (res.status) {
-        case 400:
-          throw Object.assign(new Error('잘못된 요청입니다'), { code: 400 });
-        case 404:
-          throw Object.assign(new Error('요청한 리소스를 찾을 수 없습니다'), {
-            code: 404,
-          });
-        case 408:
-          throw Object.assign(new Error('요청 시간이 초과되었습니다'), {
-            code: 408,
-          });
-        default:
-          throw Object.assign(new Error('서버 오류가 발생했습니다'), {
-            code: res.status,
-          });
-      }
-    }
-    return await res.json();
-  } catch (err) {
-    if (err.name === 'AbortError') {
-      throw Object.assign(new Error('요청 시간이 초과되었습니다'), {
-        code: 408,
-      });
-    }
-    throw err;
-  } finally {
-    clearTimeout(id);
-  }
+  return apiFetch(`/api/users/${userId}/fridge/image-to-ingredients`, {
+    method: 'POST',
+    body: form, // FormData면 apiFetch가 Content-Type을 생략한다
+    timeout: timeoutMs,
+  });
 }
 
 /* ---------------- 냉장고 재료 ---------------- */

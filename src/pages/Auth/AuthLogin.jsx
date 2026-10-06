@@ -1,87 +1,46 @@
 // src/pages/Auth/AuthLogin.jsx
-import { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { useUser } from '../UserContext';
+import { googleLoginUrl, restoreSession } from '../../lib/auth';
 import styles from './AuthLogin.module.css';
 import LogoIcon from '../../assets/svg/Main/logo.svg?react';
 
-const API = 'http://localhost:8080';
-
+// 로그인 흐름 (AGENTS.md 5.1): 백엔드가 OAuth를 끝내고 refresh_token 쿠키를 심은 뒤 main-url?from=oauth로 보낸다.
+// 이 화면은 refresh 쿠키로 세션을 복원하고, 없으면 구글 로그인 버튼을 보여 준다.
+// access 토큰은 URL로 받지 않는다 (C7)
 export default function AuthLogin() {
   const { login } = useUser();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // 1️⃣ 쿼리 파라미터에 access token이 있으면 바로 로그인 처리
-  const handleOAuthCallback = async () => {
-    const params = new URLSearchParams(location.search);
-    const access = params.get('access');
-    console.log(12345);
-
-    if (access) {
-      login(access, { username: '사용자' }); // username은 임시, 필요 시 서버에서 가져오세요
-      params.delete('access');
-      const clean = params.toString();
-      const newUrl = `${location.pathname}${clean ? `?${clean}` : ''}${location.hash || ''}`;
-      window.history.replaceState(null, '', newUrl);
-      navigate('/', { replace: true });
-      return true;
-    }
-    return false;
-  };
-
-  // 2️⃣ 세션 복원: access 없으면 refresh 호출
-  const restoreSession = async () => {
-    console.log(12345);
-    const res = await fetch(`${API}/api/auth/refresh`, {
-      method: 'POST',
-      credentials: 'include',
-    });
-    console.log(12345);
-    if (!res.ok) return;
-
-    const j = await res.json();
-    const access = j?.data?.access;
-    console.log(1234);
-    console.log(access);
-    if (!access) return;
-
-    // 2) 사용자 정보 조회
-    const userRes = await fetch(`${API}/api/users/me`, {
-      headers: { Authorization: `Bearer ${access}` },
-    });
-    console.log('123123');
-    const userJson = await userRes.json();
-
-    console.log(userJson?.data?.id);
-    console.log(userJson?.data?.name);
-
-    login(
-      access, // token (문자열)
-      {
-        id: userJson?.data?.id,
-        username: userJson?.data?.name,
-        email: userJson?.data?.email,
-        photoUrl: userJson?.data?.picture,
-      }
-    );
-
-    navigate('/', { replace: true });
-  };
+  const [err, setErr] = useState('');
 
   useEffect(() => {
-    // 먼저 URL에서 access token 처리
-    console.log('AuthLogin 렌더링됨');
-    handleOAuthCallback().then((handled) => {
-      if (!handled) {
-        // 없으면 refresh 시도
-        restoreSession();
+    let ignore = false;
+    (async () => {
+      try {
+        const session = await restoreSession();
+        if (ignore || !session) return;
+        const { access, profile } = session;
+        login(access, {
+          id: profile.id,
+          username: profile.name,
+          email: profile.email,
+          photoUrl: profile.picture,
+        });
+        navigate('/', { replace: true });
+      } catch (e) {
+        if (!ignore) setErr(e.message);
       }
-    });
-  }, [location]);
+    })();
+    return () => {
+      ignore = true;
+    };
+    // 화면에 들어올 때 한 번만 복원한다
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleLogin = () => {
-    window.location.href = `${API}/api/v2/oauth2/google`;
+    window.location.href = googleLoginUrl();
   };
 
   return (
@@ -95,6 +54,7 @@ export default function AuthLogin() {
       <button className={styles.loginButton} onClick={handleLogin}>
         구글 계정 로그인
       </button>
+      {err && <p role="alert">{err}</p>}
     </div>
   );
 }
