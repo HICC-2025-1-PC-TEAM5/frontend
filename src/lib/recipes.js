@@ -1,16 +1,5 @@
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL, // ✅ 오타 수정
-  withCredentials: true, // ✅ 세미콜론 → 콤마
-  timeout: 10000,
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+// 공용 클라이언트: Bearer 자동 첨부 + 401/419 시 refresh 후 1회 재시도 (F3)
+import api from './api';
 
 function toReadableError(err) {
   if (err?.response) {
@@ -79,6 +68,3 @@ export async function patchRecipePreference(userId, recipeId, type) {
     toReadableError(err);
   }
 }
-
-// 공용 axios 인스턴스를 다른 모듈에서도 쓰려면 export
-export default api;
