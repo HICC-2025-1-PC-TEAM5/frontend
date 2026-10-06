@@ -126,39 +126,33 @@ export async function deleteFridgeIngredient({
   });
 }
 
-export async function removeIngredient(userId, ingredientId) {
-  const res = await api.delete(
-    `/api/users/${userId}/fridge/ingredients/${ingredientId}`
+/**
+ * 냉장고 재료 여러 개를 id로 삭제한다. 일괄 삭제 API가 없어 개별 삭제를 동시에 보낸다 (D-017)
+ * 일부가 실패해도 나머지 결과를 돌려준다. 실패를 성공으로 숨기지 않는다
+ * @returns {Promise<{ deleted: Array<string|number>, failed: Array<string|number> }>}
+ */
+export async function deleteFridgeIngredients({ userId, ids = [] }) {
+  const results = await Promise.allSettled(
+    ids.map((id) => api.delete(`/api/users/${userId}/fridge/ingredients/${id}`))
   );
-  return res.data;
+  const deleted = [];
+  const failed = [];
+  results.forEach((r, i) =>
+    (r.status === 'fulfilled' ? deleted : failed).push(ids[i])
+  );
+  return { deleted, failed };
 }
 
-export async function removeIngredientsByNames(userId, names = []) {
-  const clean = names.map((n) => String(n).trim()).filter(Boolean);
-  if (!clean.length) return { ok: true, deleted: [] };
-
-  // 1) 서버가 배치 삭제를 지원하면 우선 사용
-  try {
-    const res = await api.delete(
-      `/api/users/${userId}/fridge/ingredients/by-names`,
-      { data: { names: clean } }
-    );
-    return res.data; // { ok, deleted: [...] } 가정
-  } catch (err) {
-    const st = err?.response?.status;
-    if (st && st !== 404 && st !== 405) throw err;
-  }
-
-  // 2) 대체: 목록 조회 → 이름 매칭 → 개별 삭제
-  const data = await getIngredients(userId);
-  const raw = Array.isArray(data) ? data : (data?.refrigeratorIngredient ?? []);
-  const set = new Set(clean.map((s) => s.toLowerCase()));
-  const targets = raw.filter((it) =>
-    set.has(String(it.name || '').toLowerCase())
-  );
-
-  await Promise.allSettled(targets.map((t) => removeIngredient(userId, t.id)));
-  return { ok: true, deleted: targets.map((t) => t.name) };
+/**
+ * 레시피 재료 문자열(예: "돼지고기 200g")에 이름이 들어 있는 냉장고 재료를 후보로 고른다 (D-017)
+ * 후보는 사용자가 확인하고 체크한 것만 삭제한다
+ */
+export function matchUsedIngredients(recipeTexts = [], fridgeItems = []) {
+  const texts = recipeTexts.map((t) => String(t).replace(/\s+/g, ''));
+  return fridgeItems.filter((it) => {
+    const name = String(it.name || '').replace(/\s+/g, '');
+    return name && texts.some((t) => t.includes(name));
+  });
 }
 
 /* ---------------- 기본 재료 추천(necessary) ---------------- */

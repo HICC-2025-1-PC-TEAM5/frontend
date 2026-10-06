@@ -10,7 +10,12 @@ import Wrapper from '../../../components/Wrapper';
 import Stack from '../../../components/Stack';
 import CookingStep from '../components/CookingStep';
 import { fetchRecipeDetail } from '../../../lib/recipes';
-import { removeIngredientsByNames } from '../../../lib/fridge'; // ✅ 새 유틸 사용
+import {
+  getIngredients,
+  deleteFridgeIngredients,
+  matchUsedIngredients,
+} from '../../../lib/fridge';
+import UsedIngredientsSheet from '../components/UsedIngredientsSheet';
 import { useUser } from '../../UserContext';
 
 export default function Recipe() {
@@ -74,18 +79,56 @@ export default function Recipe() {
 
   const handleStart = () => setShowSteps(true);
 
+  // 조리 완료: 냉장고 재료를 불러와 다 쓴 재료를 사용자가 고르게 한다 (D-017)
+  const [usedSheet, setUsedSheet] = useState(null); // { candidates, others } | null
+  const [completeErr, setCompleteErr] = useState('');
+
   const handleComplete = async () => {
     try {
       setSaving(true);
+      setCompleteErr('');
       if (!userId) throw new Error('로그인이 필요합니다.');
-      await removeIngredientsByNames(userId, usedIngredientNames);
-      navigate('/fridge');
+      const data = await getIngredients(userId);
+      const fridge = data?.refrigeratorIngredient ?? [];
+      const candidates = matchUsedIngredients(usedIngredientNames, fridge);
+      const candidateIds = new Set(candidates.map((it) => it.id));
+      setUsedSheet({
+        candidates,
+        others: fridge.filter((it) => !candidateIds.has(it.id)),
+      });
     } catch (e) {
-      console.error(e);
-      alert('조리 완료 처리 중 오류가 발생했어요.');
+      setCompleteErr(e.message || '냉장고 재료를 불러오지 못했어요.');
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleUsedSubmit = async (ids) => {
+    if (ids.length === 0) {
+      navigate('/fridge');
+      return;
+    }
+    setSaving(true);
+    setCompleteErr('');
+    const { failed } = await deleteFridgeIngredients({ userId, ids });
+    setSaving(false);
+    if (failed.length === 0) {
+      navigate('/fridge');
+      return;
+    }
+    // 실패한 재료는 목록에 남기고 알린다
+    const all = [...usedSheet.candidates, ...usedSheet.others];
+    const failedNames = all
+      .filter((it) => failed.includes(it.id))
+      .map((it) => it.name);
+    const deletedIds = new Set(ids.filter((id) => !failed.includes(id)));
+    setUsedSheet({
+      candidates: usedSheet.candidates.filter((it) => !deletedIds.has(it.id)),
+      others: usedSheet.others.filter((it) => !deletedIds.has(it.id)),
+    });
+    setCompleteErr(
+      `${failedNames.join(', ')} 삭제에 실패했어요. 다시 시도해 주세요.`
+    );
   };
 
   const r = detail?.recipe;
@@ -191,10 +234,25 @@ export default function Recipe() {
               onClick={handleComplete}
               disabled={saving}
             >
-              {saving ? '처리 중…' : '조리완료'}
+              {saving && !usedSheet ? '처리 중…' : '조리완료'}
             </Button>
+            {completeErr && !usedSheet && <p role="alert">{completeErr}</p>}
           </Wrapper>
         </div>
+      )}
+
+      {usedSheet && (
+        <UsedIngredientsSheet
+          candidates={usedSheet.candidates}
+          others={usedSheet.others}
+          saving={saving}
+          error={completeErr}
+          onClose={() => {
+            setUsedSheet(null);
+            setCompleteErr('');
+          }}
+          onSubmit={handleUsedSubmit}
+        />
       )}
 
       <div className={styles.controlMargin}></div>
