@@ -10,15 +10,13 @@ function authHeaders(token) {
 }
 
 // 내부 → 서버 전송용 보관 위치 매핑
+// 서버는 BE StorageCondition 값('실온' | '냉장실' | '냉동고')만 받는다 (D-015, 다른 값은 400)
 function serverTypeFromInternal(t) {
   const v = String(t ?? '').trim();
-  // 내부 영문 코드 지원
-  if (v === 'room') return '실온';
-  if (v === 'fridge' || v === '냉장실') return '냉장고';
-  if (v === 'freezer') return '냉동고';
-  // 이미 한글일 수 있음
-  if (v === '실온' || v === '냉장고' || v === '냉동고') return v;
-  return '실온';
+  if (v === 'room' || v === '실온') return '실온';
+  if (v === 'freezer' || v === '냉동고' || v === '냉동실') return '냉동고';
+  if (v === 'fridge' || v === '냉장실' || v === '냉장고') return '냉장실';
+  return '냉장실'; // 보관 위치를 고르지 않은 경우 (사진·영수증 등록 기본값과 같음)
 }
 
 /* ---------------- 영수증/이미지 인식 ---------------- */
