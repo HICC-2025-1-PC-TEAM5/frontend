@@ -49,10 +49,11 @@ export async function addPreference(userId, { recipeId, type }) {
   }
 }
 
-export async function deletePreference(userId, id) {
+// 서버: DELETE /api/users/{userId}/preference body { recipeId } — 해당 레시피의 좋아요/싫어요를 지운다 (C4, D-016)
+export async function deletePreference(userId, recipeId) {
   try {
     const { data } = await api.delete(`/api/users/${userId}/preference`, {
-      data: { id }, // axios.delete body는 config.data로
+      data: { recipeId }, // axios.delete body는 config.data로
     });
     return data; // { message: "OK" }
   } catch (err) {

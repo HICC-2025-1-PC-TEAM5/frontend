@@ -126,21 +126,19 @@ export async function addIngredients(userId, items) {
   });
 }
 
-// 수량 수정 (PATCH)
+// 수량 수정 (PATCH) — 서버: PATCH /api/users/{userId}/fridge/ingredients
+// body { refrigeratorIngredientId, quantity }. quantity가 0이면 서버가 재료를 삭제한다 (C2, D-016)
 export async function patchFridgeQuantity({
   userId,
   refrigeratorId,
   quantity,
   token,
 }) {
-  return apiFetch(
-    `/api/users/${userId}/fridge/ingredients/${refrigeratorId}/quantity`,
-    {
-      method: 'PATCH',
-      headers: authHeaders(token),
-      body: { quantity },
-    }
-  );
+  return apiFetch(`/api/users/${userId}/fridge/ingredients`, {
+    method: 'PATCH',
+    headers: authHeaders(token),
+    body: { refrigeratorIngredientId: refrigeratorId, quantity },
+  });
 }
 
 // 재료 상세 조회 (GET) - 냉장고 보유 품목 상세
