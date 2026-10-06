@@ -1,6 +1,6 @@
 // src/pages/Fridge/Fridge.jsx
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router';
 import Button from '../../components/Button';
 import OptionsInput from '../../components/OptionsInput';
 import Nav from '../../components/Nav';

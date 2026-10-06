@@ -1,6 +1,6 @@
 // src/pages/Auth/AuthLogin.jsx
 import { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router';
 import { useUser } from '../UserContext';
 import styles from './AuthLogin.module.css';
 import LogoIcon from '../../assets/svg/Main/logo.svg?react';
