@@ -14,7 +14,7 @@ import { removeIngredientsByNames } from '../../../lib/fridge'; // ✅ 새 유�
 import { useUser } from '../../UserContext';
 
 export default function Recipe() {
-  const { id } = useParams();
+  const { recipeid: id } = useParams(); // 라우트: RecipesRouter의 ':recipeid' (F6)
   const navigate = useNavigate();
   // 로그인 사용자의 id만 쓴다. 서버가 {userId}와 로그인 사용자가 같은지 검사한다 (D-012)
   const { id: userId } = useUser();
