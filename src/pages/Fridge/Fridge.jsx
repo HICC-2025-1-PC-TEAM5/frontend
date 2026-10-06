@@ -89,7 +89,7 @@ export default function Fridge() {
     let ignore = false;
     (async () => {
       try {
-        const userId = userIdFromCtx || import.meta.env.VITE_DEV_USER_ID;
+        const userId = userIdFromCtx;
         if (!userId) return; // 유저 준비 전엔 호출 안 함
 
         // 1) 현재 냉장고 재료 불러오기

@@ -5,6 +5,7 @@ import CategorySelect from '../components/CategorySelect';
 import Button from '../../../components/Button';
 import styles from './EditList.module.css';
 import { getIngredients, deleteFridgeIngredient } from '../../../lib/fridge';
+import { useUser } from '../../UserContext';
 
 // 보관위치 정규화: '냉장/냉장실' → 'fridge' 등
 function normalizeLocation(loc = '') {
@@ -46,6 +47,8 @@ function normalizeCategoryKo(mainCat, raw) {
 
 export default function EditList() {
   const navigate = useNavigate();
+  // 로그인 사용자의 id만 쓴다. 서버가 {userId}와 로그인 사용자가 같은지 검사한다 (D-012)
+  const { id: userId, token } = useUser();
   const [items, setItems] = useState([]);
   const [selected, setSelected] = useState(new Set());
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -54,9 +57,9 @@ export default function EditList() {
   const [subCat, setSubCat] = useState('all');
 
   useEffect(() => {
+    if (!userId) return; // 유저 준비 전엔 호출 안 함
     (async () => {
       try {
-        const userId = import.meta.env.VITE_DEV_USER_ID || '1';
         const data = await getIngredients(userId);
         const raw = Array.isArray(data)
           ? data
@@ -86,7 +89,7 @@ export default function EditList() {
         alert('재료를 불러오지 못했어요');
       }
     })();
-  }, []);
+  }, [userId]);
 
   const filtered = useMemo(() => {
     return items.filter((it) => {
@@ -114,8 +117,6 @@ export default function EditList() {
   const handleDelete = async () => {
     const ids = Array.from(selected);
     try {
-      const userId = localStorage.getItem('userId');
-      const token = localStorage.getItem('token');
       if (!userId || !token) throw new Error('로그인이 필요합니다.');
 
       await Promise.all(

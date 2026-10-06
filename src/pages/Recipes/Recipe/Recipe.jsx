@@ -11,10 +11,13 @@ import Stack from '../../../components/Stack';
 import CookingStep from '../components/CookingStep';
 import { fetchRecipeDetail } from '../../../lib/recipes';
 import { removeIngredientsByNames } from '../../../lib/fridge'; // ✅ 새 유틸 사용
+import { useUser } from '../../UserContext';
 
 export default function Recipe() {
   const { id } = useParams();
   const navigate = useNavigate();
+  // 로그인 사용자의 id만 쓴다. 서버가 {userId}와 로그인 사용자가 같은지 검사한다 (D-012)
+  const { id: userId } = useUser();
   const handleBack = () => navigate(-1);
 
   const [showSteps, setShowSteps] = useState(false);
@@ -26,14 +29,11 @@ export default function Recipe() {
   const [detail, setDetail] = useState(null); // { recipe, recipeGuide }
 
   useEffect(() => {
+    if (!userId) return; // 유저 준비 전엔 호출 안 함
     (async () => {
       try {
         setLoading(true);
         setErr('');
-        const userId =
-          localStorage.getItem('userId') ||
-          import.meta.env.VITE_DEV_USER_ID ||
-          '1';
         const data = await fetchRecipeDetail(userId, id);
         setDetail(data);
       } catch (e) {
@@ -42,7 +42,7 @@ export default function Recipe() {
         setLoading(false);
       }
     })();
-  }, [id]);
+  }, [id, userId]);
 
   const ingredientsYes = useMemo(() => {
     const raw = detail?.recipe?.ingredients || '';
@@ -77,10 +77,7 @@ export default function Recipe() {
   const handleComplete = async () => {
     try {
       setSaving(true);
-      const userId =
-        localStorage.getItem('userId') ||
-        import.meta.env.VITE_DEV_USER_ID ||
-        '1';
+      if (!userId) throw new Error('로그인이 필요합니다.');
       await removeIngredientsByNames(userId, usedIngredientNames);
       navigate('/fridge');
     } catch (e) {
