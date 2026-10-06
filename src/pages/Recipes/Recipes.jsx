@@ -6,44 +6,28 @@ import SelectHeader from './components/SelectHeader';
 import Nav from '../../components/Nav';
 import Wrapper from '../../components/Wrapper';
 import Stack from '../../components/Stack';
-import OptionsInput from '../../components/OptionsInput';
 import RecipeCard from './components/RecipeCard';
 import { useUser } from '../UserContext';
-import api from '../../lib/api'; // 서버로 직접 호출
-import { buildRecommendParams } from '../../lib/preference';
+import { fetchRecommendedRecipes } from '../../lib/recipes';
 
 function Recipes() {
-  const { username, id: ctxUserId } = useUser() || {};
-  const userId = ctxUserId || localStorage.getItem('userId');
+  // 로그인 사용자의 id만 쓴다 (D-012)
+  const { username, id: userId } = useUser() || {};
   const name = username || '사용자';
   const navigate = useNavigate();
 
-  const [sort, setSort] = useState('popular');
   const [loading, setLoading] = useState(true);
   const [list, setList] = useState([]);
   const [error, setError] = useState('');
 
-  const handleSortChange = (v) => {
-    const next = v?.target ? v.target.value : v;
-    setSort(next);
-    fetchRecipes(next);
-  };
-
-  async function fetchRecipes(sortKey = sort) {
+  // 재료는 서버가 냉장고에서 고른다 (C1, D-018)
+  async function fetchRecipes() {
     try {
       setLoading(true);
       setError('');
       if (!userId) throw new Error('로그인이 필요합니다.');
 
-      // 1) 추천 파라미터 구성
-      const params = await buildRecommendParams(userId);
-      if (sortKey) params.sort = sortKey;
-
-      // 2) GET + querystring으로 호출 (415 방지)
-      const { data } = await api.get(`/api/users/${userId}/recipes`, {
-        params,
-      });
-
+      const data = await fetchRecommendedRecipes(userId);
       setList(Array.isArray(data?.recipe) ? data.recipe : []);
     } catch (e) {
       setList([]);
@@ -71,20 +55,7 @@ function Recipes() {
         <div className={styles.headerBlur}></div>
       </div>
 
-      <div className={styles.toolbar}>
-        <Wrapper>
-          <div className={styles.sortBox}>
-            <OptionsInput
-              defaultValue="popular"
-              onChange={handleSortChange}
-              size="small"
-            >
-              <option value="popular">인기순</option>
-              <option value="latest">최신순</option>
-            </OptionsInput>
-          </div>
-        </Wrapper>
-      </div>
+      {/* 정렬(인기순·최신순)은 서버에 기준 데이터가 없어 숨긴다. 레시피 로컬 DB 전환 때 다시 넣는다 (D-018) */}
 
       <div className={styles.recipes}>
         <Wrapper>

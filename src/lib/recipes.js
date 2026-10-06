@@ -26,16 +26,13 @@ function toReadableError(err) {
   throw err;
 }
 
-/** 레시피 추천: POST /api/users/{userId}/recipes
+/** 레시피 추천: GET /api/users/{userId}/recipes
+ * 재료는 서버가 사용자 냉장고에서 고르고, 알레르기·싫어요 레시피도 서버가 거른다 (C1, D-018)
  * @returns {Promise<{recipe:Array}>}
  */
-export async function fetchRecommendedRecipes(userId, { sort } = {}) {
+export async function fetchRecommendedRecipes(userId) {
   try {
-    const { data } = await api.post(
-      `/api/users/${userId}/recipes`,
-      null,
-      sort ? { params: { sort } } : undefined
-    );
+    const { data } = await api.get(`/api/users/${userId}/recipes`);
     return data; // { recipe: [...] }
   } catch (err) {
     toReadableError(err);
