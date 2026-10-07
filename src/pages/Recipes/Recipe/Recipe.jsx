@@ -1,6 +1,6 @@
 // src/pages/Recipes/Recipe/Recipe.jsx
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useLocation, useNavigate, useParams } from 'react-router';
 import styles from './Recipe.module.css';
 import RecipeInfo from '../components/RecipeInfo';
 import ImageCoin from '../../../components/ImageCoin';
@@ -16,11 +16,14 @@ import {
   matchUsedIngredients,
 } from '../../../lib/fridge';
 import UsedIngredientsSheet from '../components/UsedIngredientsSheet';
+import ExpiredNotice from '../components/ExpiredNotice';
 import { useUser } from '../../UserContext';
 
 export default function Recipe() {
   const { recipeid: id } = useParams(); // 라우트: RecipesRouter의 ':recipeid' (F6)
   const navigate = useNavigate();
+  // 추천 목록에서 들어오면 소비기한 지난 재료 이름이 넘어온다 (RecipeCard)
+  const expiredIngredients = useLocation().state?.expiredIngredients;
   // 로그인 사용자의 id만 쓴다. 서버가 {userId}와 로그인 사용자가 같은지 검사한다 (D-012)
   const { id: userId } = useUser();
   const handleBack = () => navigate(-1);
@@ -169,6 +172,7 @@ export default function Recipe() {
               description={`${r?.portion || ''} · ${r?.type || ''} · ${Math.round(r?.kcal || 0)} kcal`}
             />
           )}
+          {!loading && !err && <ExpiredNotice names={expiredIngredients} />}
         </Wrapper>
       </div>
 

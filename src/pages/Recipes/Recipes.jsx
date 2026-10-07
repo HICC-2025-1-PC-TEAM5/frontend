@@ -74,6 +74,7 @@ function Recipes() {
                   title={r.name}
                   imageSrc={r.image}
                   servings={r.portion}
+                  expiredIngredients={r.expiredIngredients}
                 />
               ))}
             </Stack>

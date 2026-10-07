@@ -3,14 +3,16 @@ import ImageCard from '../../../components/ImageCard';
 import SaveToggleButton from '../../../components/SaveToggleButton';
 import PeopleIcon from '../../../assets/svg/Recipe/people.svg?react';
 import { useSavedRecipes } from '../SavedRecipesContext';
+import ExpiredNotice from './ExpiredNotice';
 import styles from './RecipeCard.module.css';
 
-export default function RecipeCard({ id, title, imageSrc, servings }) {
+export default function RecipeCard({ id, title, imageSrc, servings, expiredIngredients }) {
   const navigate = useNavigate();
   const { isSaved, add, remove } = useSavedRecipes();
   const saved = isSaved(id);
 
-  const goDetail = () => navigate(`/recipes/${id}`);
+  // 지난 재료 안내를 상세에서도 보여 주려고 함께 넘긴다 (상세 API에는 냉장고 정보가 없다)
+  const goDetail = () => navigate(`/recipes/${id}`, { state: { expiredIngredients } });
 
   return (
     <div className={styles.card}>
@@ -42,6 +44,8 @@ export default function RecipeCard({ id, title, imageSrc, servings }) {
             <span className={styles.servingsText}>{`${servings} 인분`}</span>
           </div>
         )}
+
+        <ExpiredNotice names={expiredIngredients} compact />
       </div>
     </div>
   );
