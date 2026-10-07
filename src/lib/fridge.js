@@ -79,6 +79,8 @@ export async function addIngredients(userId, items) {
       type: serverTypeFromInternal(it.type), // 내부값 → 서버값
       input_date: it.input_date || it.inputDate || nowISO,
       ...(expireISO ? { expire_date: expireISO } : {}),
+      // AI 인식 카테고리. 마스터에 없는 재료는 이 값으로 소비기한을 계산한다 (B23, D-029)
+      ...(it.category ? { category: it.category } : {}),
     };
   });
 
