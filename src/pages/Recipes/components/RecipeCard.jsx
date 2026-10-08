@@ -6,6 +6,12 @@ import { useSavedRecipes } from '../SavedRecipesContext';
 import ExpiredNotice from './ExpiredNotice';
 import styles from './RecipeCard.module.css';
 
+// 서버 portion은 이미 "1인분"처럼 단위가 붙어 온다. 숫자만 올 때만 "인분"을 붙인다 (F7)
+function formatServings(servings) {
+  const text = String(servings).trim();
+  return /^\d+(\.\d+)?$/.test(text) ? `${text}인분` : text;
+}
+
 export default function RecipeCard({ id, title, imageSrc, servings, expiredIngredients }) {
   const navigate = useNavigate();
   const { isSaved, add, remove } = useSavedRecipes();
@@ -41,7 +47,7 @@ export default function RecipeCard({ id, title, imageSrc, servings, expiredIngre
         {servings != null && (
           <div className={styles.descRow}>
             <PeopleIcon className={styles.peopleIcon} />
-            <span className={styles.servingsText}>{`${servings} 인분`}</span>
+            <span className={styles.servingsText}>{formatServings(servings)}</span>
           </div>
         )}
 
