@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import api from '../../lib/api';
+import { restoreSession } from '../../lib/auth';
 import { useUser } from '../UserContext';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
@@ -9,7 +10,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL;
 export default function AuthCallback() {
   const nav = useNavigate();
   const loc = useLocation();
-  const { applyOAuthResponse, login, setUserFromOAuth } = useUser();
+  const { applyOAuthResponse, login } = useUser();
   const [err, setErr] = useState('');
 
   useEffect(() => {
@@ -27,29 +28,29 @@ export default function AuthCallback() {
           )}&state=${encodeURIComponent(state)}`;
 
           const { data } = await api.get(url); // withCredentials=true라 쿠키 세팅 됨
-          // 권장: 응답 전체를 컨텍스트에 일괄 반영(이름/사진/토큰)
-          if (typeof applyOAuthResponse === 'function') {
-            applyOAuthResponse(data);
-          } else {
-            // 구버전 안전망: 프로필/토큰 따로 반영
-            if (data?.user) setUserFromOAuth(data.user);
-            const token = data?.tokens?.accessToken;
-            if (token) login(token);
-          }
+          // 응답 전체(이름/사진/토큰)를 컨텍스트에 반영. 토큰은 메모리에만 둔다 (D-036)
+          applyOAuthResponse(data);
         } else {
           // 2) code/state가 없으면 → 백엔드가 이미 콜백을 끝내고 우리 도메인으로 리디렉션한 케이스
-          // refresh 쿠키로 액세스 토큰만 복구
-          const { data } = await api.post('/api/auth/refresh');
-          const token = data?.data?.access;
-          if (token) login(token);
-          // (프로필은 필요시 별도 /me 엔드포인트가 있으면 거기서 가져오면 됨)
+          // refresh 쿠키로 토큰과 프로필을 복구한다
+          const session = await restoreSession();
+          if (session) {
+            login(session.access, {
+              id: session.profile.id,
+              username: session.profile.name,
+              email: session.profile.email,
+              photoUrl: session.profile.picture,
+            });
+          }
         }
         nav(backTo, { replace: true });
       } catch (e) {
         setErr(e?.message || '로그인 처리에 실패했습니다.');
       }
     })();
-  }, [loc.search, nav, applyOAuthResponse, login, setUserFromOAuth]);
+    // 콜백 주소에 들어올 때 한 번만 처리한다
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loc.search]);
 
   if (err) return <p style={{ padding: '1rem', color: 'crimson' }}>{err}</p>;
   return <p style={{ padding: '1rem' }}>로그인 처리 중…</p>;

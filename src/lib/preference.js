@@ -1,5 +1,6 @@
 import api from './api';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { readUserItem, writeUserItem } from './userStorage';
 
 /* ---------------- 공통 에러 ---------------- */
 function toReadableError(err) {
@@ -160,9 +161,10 @@ const norm = (arr) =>
     )
   );
 
-export function getIngredientPrefs() {
+// 계정별 키에 저장한다 (D-036)
+export function getIngredientPrefs(userId) {
   try {
-    const raw = JSON.parse(localStorage.getItem(KEY)) || {};
+    const raw = readUserItem(KEY, userId) || {};
     return {
       likeIngredients: norm(raw.likeIngredients),
       dislikeIngredients: norm(raw.dislikeIngredients),
@@ -172,14 +174,14 @@ export function getIngredientPrefs() {
   }
 }
 
-export function saveIngredientPrefs({ likeIngredients, dislikeIngredients }) {
-  localStorage.setItem(
-    KEY,
-    JSON.stringify({
-      likeIngredients: norm(likeIngredients),
-      dislikeIngredients: norm(dislikeIngredients),
-    })
-  );
+export function saveIngredientPrefs(
+  userId,
+  { likeIngredients, dislikeIngredients }
+) {
+  writeUserItem(KEY, userId, {
+    likeIngredients: norm(likeIngredients),
+    dislikeIngredients: norm(dislikeIngredients),
+  });
 }
 
 /* ---- 서버 추천 호출용 파라미터 빌더 (핵심) ---- */
@@ -187,7 +189,7 @@ export function saveIngredientPrefs({ likeIngredients, dislikeIngredients }) {
  * @returns {{ likeIngredients: string, excludeIngredients: string }}
  */
 export async function buildRecommendParams(userId) {
-  const { likeIngredients, dislikeIngredients } = getIngredientPrefs();
+  const { likeIngredients, dislikeIngredients } = getIngredientPrefs(userId);
   const allergies = await getAllergies(userId); // [{allergyId, name}]
   const allergyNames = (allergies || []).map((a) => a.name);
 

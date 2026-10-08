@@ -12,11 +12,13 @@ import {
   deleteFridgeIngredient,
   getIngredientDetail,
 } from '../../../lib/fridge';
+import { useUser } from '../../UserContext';
 
 export default function Ingredient() {
   const navigate = useNavigate();
   const { id: ingredientIdParam } = useParams(); // URL의 :id (ingredientId로 사용)
   const location = useLocation();
+  const { id: userId } = useUser();
 
   // 목록에서 넘어올 때 refrigeratorId를 state로 넘겼다면 사용
   const refrigeratorIdFromList = location.state?.refrigeratorId;
@@ -40,14 +42,11 @@ export default function Ingredient() {
   useEffect(() => {
     const run = async () => {
       try {
-        const userId = localStorage.getItem('userId');
-        const token = localStorage.getItem('token');
-        if (!userId || !token) return;
+        if (!userId) return;
 
         const data = await getIngredientDetail({
           userId,
           ingredientId: ingredientIdParam,
-          token,
         });
         // 서버 응답 스키마 예시에 맞춰 매핑
         const ing = data?.ingredient;
@@ -66,17 +65,14 @@ export default function Ingredient() {
       }
     };
     run();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ingredientIdParam]);
+  }, [ingredientIdParam, userId]);
 
   const handleBack = () => navigate(-1);
 
   // 수량 수정 완료 → PATCH 호출
   const handleEditSubmit = async (form) => {
     try {
-      const userId = localStorage.getItem('userId');
-      const token = localStorage.getItem('token');
-      if (!userId || !token) throw new Error('로그인이 필요합니다.');
+      if (!userId) throw new Error('로그인이 필요합니다.');
 
       // refrigeratorId 확보: state로 안 왔다면 목록/카드에서 함께 넘겨주세요.
       const refrigeratorId =
@@ -93,7 +89,6 @@ export default function Ingredient() {
         userId,
         refrigeratorId,
         quantity: form.quantity, // EditSheet에서 변경된 수량
-        token,
       });
 
       // 로컬 상태 동기화
@@ -116,9 +111,7 @@ export default function Ingredient() {
     if (!confirm('정말 삭제할까요?')) return;
 
     try {
-      const userId = localStorage.getItem('userId');
-      const token = localStorage.getItem('token');
-      if (!userId || !token) throw new Error('로그인이 필요합니다.');
+      if (!userId) throw new Error('로그인이 필요합니다.');
 
       const refrigeratorId =
         ingredient.refrigeratorId ||
@@ -130,7 +123,7 @@ export default function Ingredient() {
         return;
       }
 
-      await deleteFridgeIngredient({ userId, refrigeratorId, token });
+      await deleteFridgeIngredient({ userId, refrigeratorId });
       alert('삭제되었습니다.');
       navigate(-1);
     } catch (err) {

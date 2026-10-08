@@ -48,7 +48,7 @@ function normalizeCategoryKo(mainCat, raw) {
 export default function EditList() {
   const navigate = useNavigate();
   // 로그인 사용자의 id만 쓴다. 서버가 {userId}와 로그인 사용자가 같은지 검사한다 (D-012)
-  const { id: userId, token } = useUser();
+  const { id: userId } = useUser();
   const [items, setItems] = useState([]);
   const [selected, setSelected] = useState(new Set());
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -117,11 +117,11 @@ export default function EditList() {
   const handleDelete = async () => {
     const ids = Array.from(selected);
     try {
-      if (!userId || !token) throw new Error('로그인이 필요합니다.');
+      if (!userId) throw new Error('로그인이 필요합니다.');
 
       await Promise.all(
         ids.map((refrigeratorId) =>
-          deleteFridgeIngredient({ userId, refrigeratorId, token })
+          deleteFridgeIngredient({ userId, refrigeratorId })
         )
       );
 

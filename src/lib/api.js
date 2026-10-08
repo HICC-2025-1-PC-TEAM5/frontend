@@ -9,58 +9,46 @@ const RAW_BASE =
 export const BASE_URL = String(RAW_BASE).replace(/\/+$/, ''); // <- 정규화 (C7: 로그인 리다이렉트 주소에도 사용)
 
 /* ===========================
-  토큰 스토리지 유틸 (호환 보장)
-  - 우선순위: localStorage.user.token → token → accessToken
-  - set 시 user.token / token / accessToken 모두 갱신
+  access 토큰 (D-036)
+  - 메모리에만 둔다. localStorage에 저장하지 않는다
+  - 새로고침하면 사라지므로 UserContext가 refresh 쿠키로 다시 받는다 (lib/auth.js restoreSession)
+  - 토큰을 읽고 쓰는 곳은 이 파일뿐이다. 화면은 토큰을 직접 붙이지 않는다 (요청 인터셉터가 붙임)
 =========================== */
-function readUserObj() {
-  try {
-    const raw = localStorage.getItem('user');
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-function writeUserObj(next) {
-  try {
-    localStorage.setItem('user', JSON.stringify(next || {}));
-  } catch {}
-}
+let accessToken = null;
+const tokenListeners = new Set();
 
 export function getAccessToken() {
-  const user = readUserObj();
-  return (
-    (user && typeof user.token === 'string' && user.token) ||
-    localStorage.getItem('token') || // 레거시 호환
-    localStorage.getItem('accessToken') ||
-    null
-  );
+  return accessToken;
 }
 
 export function setAccessToken(token) {
   // 문자열이 아니면 제거 동작으로 처리
   if (!token || typeof token !== 'string') return clearAccessToken();
-
-  // 1) user.token 동기화
-  const user = readUserObj() || {};
-  user.token = token;
-  writeUserObj(user);
-
-  // 2) 레거시/타모듈 호환 키 갱신
-  localStorage.setItem('accessToken', token);
-  localStorage.setItem('token', token);
+  accessToken = token;
+  tokenListeners.forEach((fn) => fn(accessToken));
 }
 
+// refresh 실패 등으로 토큰을 잃으면 구독자(UserContext)가 로그아웃 상태로 바꾼다
 export function clearAccessToken() {
-  // 1) user.token 제거
-  const user = readUserObj();
-  if (user && user.token) {
-    delete user.token;
-    writeUserObj(user);
+  if (accessToken === null) return;
+  accessToken = null;
+  tokenListeners.forEach((fn) => fn(null));
+}
+
+/** 토큰 변경 구독. 해제 함수를 돌려준다 */
+export function subscribeAccessToken(fn) {
+  tokenListeners.add(fn);
+  return () => tokenListeners.delete(fn);
+}
+
+// D-036 이전에 토큰·프로필을 저장하던 키. 앱 시작 시 지운다
+const LEGACY_AUTH_KEYS = ['user', 'token', 'accessToken', 'userId', 'username'];
+export function clearLegacyAuthStorage() {
+  try {
+    LEGACY_AUTH_KEYS.forEach((k) => localStorage.removeItem(k));
+  } catch {
+    // 저장소를 쓸 수 없는 환경(사생활 보호 모드 등)이면 지울 것도 없다
   }
-  // 2) 키 정리
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('token');
 }
 
 /* ===========================

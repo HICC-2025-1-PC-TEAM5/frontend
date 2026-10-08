@@ -2,13 +2,6 @@
 import api, { apiFetch } from './api';
 
 /* ---------------- 공통 ---------------- */
-function authHeaders(token) {
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  };
-}
-
 // 내부 → 서버 전송용 보관 위치 매핑
 // 서버는 BE StorageCondition 값('실온' | '냉장실' | '냉동고')만 받는다 (D-015, 다른 값은 400)
 function serverTypeFromInternal(t) {
@@ -99,32 +92,24 @@ export async function patchFridgeQuantity({
   userId,
   refrigeratorId,
   quantity,
-  token,
 }) {
   return apiFetch(`/api/users/${userId}/fridge/ingredients`, {
     method: 'PATCH',
-    headers: authHeaders(token),
     body: { refrigeratorIngredientId: refrigeratorId, quantity },
   });
 }
 
 // 재료 상세 조회 (GET) - 냉장고 보유 품목 상세
-export async function getIngredientDetail({ userId, ingredientId, token }) {
+export async function getIngredientDetail({ userId, ingredientId }) {
   return apiFetch(`/api/users/${userId}/fridge/ingredients/${ingredientId}`, {
     method: 'GET',
-    headers: authHeaders(token),
   });
 }
 
 // 재료 삭제 (DELETE)
-export async function deleteFridgeIngredient({
-  userId,
-  refrigeratorId,
-  token,
-}) {
+export async function deleteFridgeIngredient({ userId, refrigeratorId }) {
   return apiFetch(`/api/users/${userId}/fridge/ingredients/${refrigeratorId}`, {
     method: 'DELETE',
-    headers: authHeaders(token),
   });
 }
 

@@ -9,6 +9,7 @@ import {
 } from 'react';
 import api from '../../lib/api';
 import { useUser } from '../UserContext';
+import { readUserItem, writeUserItem } from '../../lib/userStorage';
 
 // 서버 응답 예시:
 // GET /api/users/{userId}/history/favorites
@@ -18,21 +19,11 @@ import { useUser } from '../UserContext';
 // body: { historyId: number, type: boolean } // true=즐겨찾기 추가, false=삭제
 
 const SavedCtx = createContext(null);
-const LS_KEY = 'savedRecipes'; // 오프라인/미인증용 recipeId 캐시(Set)
+const LS_KEY = 'savedRecipes'; // recipeId 캐시(Set). 계정별 키 savedRecipes:{userId} (D-036)
 
-function readLocalSet() {
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    const arr = raw ? JSON.parse(raw) : [];
-    return new Set((arr || []).map(String));
-  } catch {
-    return new Set();
-  }
-}
-function writeLocalSet(setLike) {
-  try {
-    localStorage.setItem(LS_KEY, JSON.stringify([...setLike]));
-  } catch {}
+function readLocalSet(userId) {
+  const arr = readUserItem(LS_KEY, userId);
+  return new Set((Array.isArray(arr) ? arr : []).map(String));
 }
 
 export function SavedRecipesProvider({ children }) {
@@ -42,17 +33,36 @@ export function SavedRecipesProvider({ children }) {
   const [history, setHistory] = useState([]); // [{id:historyId, recipeId, ...}]
   const [loading, setLoading] = useState(!!isAuthed);
 
-  // 비인증/오프라인용 로컬 recipeId Set (UI 즉시 반응 & fallback)
-  const [localIds, setLocalIds] = useState(readLocalSet);
+  // 로컬 recipeId Set (UI 즉시 반응 & fallback). 어느 계정의 캐시인지 owner로 함께 들고 있어
+  // 계정이 바뀐 직후 이전 계정 값을 새 계정 키에 쓰지 않게 한다
+  const owner = userId || null;
+  const [local, setLocal] = useState(() => ({
+    owner,
+    ids: readLocalSet(owner),
+  }));
+  if (local.owner !== owner) {
+    setLocal({ owner, ids: readLocalSet(owner) });
+  }
+  const localIds = local.ids;
+  const setLocalIds = useCallback(
+    (updater) =>
+      setLocal((prev) => ({
+        owner: prev.owner,
+        ids: typeof updater === 'function' ? updater(prev.ids) : updater,
+      })),
+    []
+  );
 
-  // 로컬 캐시는 언제나 유지 (인증 여부와 무관)
   useEffect(() => {
-    writeLocalSet(localIds);
-  }, [localIds]);
+    writeUserItem(LS_KEY, local.owner, [...local.ids]);
+  }, [local]);
 
   // 인증되어 있으면 최초 동기화
   const refetch = useCallback(async () => {
-    if (!isAuthed || !userId) return;
+    if (!isAuthed || !userId) {
+      setHistory([]); // 로그아웃·계정 변경 시 이전 계정 기록을 남기지 않는다
+      return;
+    }
     setLoading(true);
     try {
       const { data } = await api.get(`/api/users/${userId}/history/favorites`);
@@ -61,7 +71,12 @@ export function SavedRecipesProvider({ children }) {
 
       // 서버 기준으로 로컬 recipeId 캐시도 맞춰둠(UX 일관)
       const serverRecipeIds = new Set(list.map((h) => String(h.recipeId)));
-      setLocalIds(serverRecipeIds);
+      // 응답이 오는 사이 계정이 바뀌었으면 새 계정 캐시에 쓰지 않는다
+      setLocal((prev) =>
+        prev.owner === userId
+          ? { owner: prev.owner, ids: serverRecipeIds }
+          : prev
+      );
     } finally {
       setLoading(false);
     }
@@ -113,7 +128,7 @@ export function SavedRecipesProvider({ children }) {
       await refetch();
       return { ok: true };
     },
-    [isAuthed, userId, byRecipeId, refetch]
+    [isAuthed, userId, byRecipeId, refetch, setLocalIds]
   );
 
   const remove = useCallback(
@@ -144,7 +159,7 @@ export function SavedRecipesProvider({ children }) {
       await refetch();
       return { ok: true };
     },
-    [isAuthed, userId, byRecipeId, refetch]
+    [isAuthed, userId, byRecipeId, refetch, setLocalIds]
   );
 
   const toggle = useCallback(
@@ -191,7 +206,7 @@ export function SavedRecipesProvider({ children }) {
       await refetch();
       return { ok: true };
     },
-    [byHistoryId, isAuthed, userId, isSaved, refetch]
+    [byHistoryId, isAuthed, userId, isSaved, refetch, setLocalIds]
   );
 
   const apiValue = useMemo(

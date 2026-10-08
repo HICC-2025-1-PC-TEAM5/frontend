@@ -47,7 +47,7 @@ export default function PreferenceInfo() {
     (async () => {
       try {
         setLoading(true);
-        const prefs = getIngredientPrefs();
+        const prefs = getIngredientPrefs(userId);
         setIngredientPrefs(prefs);
 
         if (userId) {
@@ -64,7 +64,7 @@ export default function PreferenceInfo() {
   const handleSubmit = async ({ likes: L, dislikes: D, allergies: A }) => {
     // 1) 재료 취향 저장(로컬)
     const nextPrefs = { likeIngredients: L, dislikeIngredients: D };
-    saveIngredientPrefs(nextPrefs);
+    saveIngredientPrefs(userId, nextPrefs);
     setIngredientPrefs(nextPrefs);
 
     // 2) 알레르기 동기화(서버: 삭제만 즉시, 추가는 ingredientId 필요 시 보류)

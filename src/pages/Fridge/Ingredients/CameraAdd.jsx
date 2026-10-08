@@ -14,7 +14,7 @@ import { useUser } from '../../UserContext';
 export default function CameraAdd() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { id: userId, token, isAuthed } = useUser();
+  const { id: userId, isAuthed } = useUser();
 
   // mode: 'receipt' | 'photo' (쿼리스트링 mode=receipt 지원, 기본 photo)
   const search = new URLSearchParams(location.search);
@@ -30,14 +30,14 @@ export default function CameraAdd() {
 
   // ✅ 유저 인증 체크
   useEffect(() => {
-    if (!isAuthed || !userId || !token) {
+    if (!isAuthed || !userId) {
       alert(
         '로그인 정보가 없어 촬영을 진행할 수 없어요. 로그인 후 다시 시도해주세요.'
       );
       navigate('/login', { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthed, userId, token]);
+  }, [isAuthed, userId]);
 
   useEffect(() => {
     (async () => {
@@ -218,7 +218,7 @@ export default function CameraAdd() {
       if (isReceipt) {
         recognized = await extractIngredientsFromReceipt(userId, file); // [{name, category}, ...]
       } else {
-        recognized = await extractIngredientsFromImage({ userId, token, file }); // [{name, category}, ...]
+        recognized = await extractIngredientsFromImage({ userId, file }); // [{name, category}, ...]
       }
 
       const normalized = (recognized || []).map((it) => ({
