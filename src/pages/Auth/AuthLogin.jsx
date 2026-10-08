@@ -3,6 +3,8 @@ import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useUser } from '../UserContext';
 import { googleLoginUrl } from '../../lib/auth';
+import Button from '../../components/Button';
+import Wrapper from '../../components/Wrapper';
 import styles from './AuthLogin.module.css';
 import LogoIcon from '../../assets/svg/Main/logo.svg?react';
 
@@ -25,18 +27,34 @@ export default function AuthLogin() {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.logoRow}>
-        <LogoIcon className={styles.logoIcon} />
-        <h1 className={styles.logoTitle}>오늘도 썩는 중</h1>
-      </div>
+    <Wrapper fill="height">
+      <div className={styles.container}>
+        <div className={styles.brand}>
+          <LogoIcon className={styles.logo} aria-hidden="true" />
+          <h1 className={styles.title}>오늘도 썩는 중</h1>
+          <p className={styles.tagline}>
+            냉장고 속 재료로
+            <br />
+            오늘 만들 요리를 찾아 드려요
+          </p>
+        </div>
 
-      <h2 className={styles.title}>로그인</h2>
-      <button className={styles.loginButton} onClick={handleLogin}>
-        구글 계정 로그인
-      </button>
-      {isChecking && <p>로그인 확인 중…</p>}
-      {restoreError && <p role="alert">{restoreError}</p>}
-    </div>
+        <div className={styles.actions}>
+          <Button
+            variant="primary"
+            className={styles.loginButton}
+            onClick={handleLogin}
+            disabled={isChecking}
+          >
+            {isChecking ? '로그인 확인 중…' : 'Google 계정으로 로그인'}
+          </Button>
+          {restoreError && (
+            <p role="alert" className={styles.error}>
+              {restoreError}
+            </p>
+          )}
+        </div>
+      </div>
+    </Wrapper>
   );
 }
