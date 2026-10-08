@@ -40,7 +40,7 @@ export async function fetchRecommendedRecipes(userId) {
 }
 
 /** 레시피 상세: GET /api/users/{userId}/recipes/{recipeId}
- * @returns {Promise<{recipe: {...}, recipeGuide: {steps: [...]}}>}
+ * @returns {Promise<{recipe: {...}, recipeGuide: {steps: [...]}, expiredIngredients: string[]}>}
  */
 export async function fetchRecipeDetail(userId, recipeId) {
   try {

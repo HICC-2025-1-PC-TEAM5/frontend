@@ -12,13 +12,19 @@ function formatServings(servings) {
   return /^\d+(\.\d+)?$/.test(text) ? `${text}인분` : text;
 }
 
-export default function RecipeCard({ id, title, imageSrc, servings, expiredIngredients }) {
+export default function RecipeCard({
+  id,
+  title,
+  imageSrc,
+  servings,
+  expiredIngredients,
+}) {
   const navigate = useNavigate();
   const { isSaved, add, remove } = useSavedRecipes();
   const saved = isSaved(id);
 
-  // 지난 재료 안내를 상세에서도 보여 주려고 함께 넘긴다 (상세 API에는 냉장고 정보가 없다)
-  const goDetail = () => navigate(`/recipes/${id}`, { state: { expiredIngredients } });
+  // 상세의 지난 재료 안내는 상세 응답에 들어 있다 (D-038)
+  const goDetail = () => navigate(`/recipes/${id}`);
 
   return (
     <div className={styles.card}>
@@ -47,7 +53,9 @@ export default function RecipeCard({ id, title, imageSrc, servings, expiredIngre
         {servings != null && (
           <div className={styles.descRow}>
             <PeopleIcon className={styles.peopleIcon} />
-            <span className={styles.servingsText}>{formatServings(servings)}</span>
+            <span className={styles.servingsText}>
+              {formatServings(servings)}
+            </span>
           </div>
         )}
 

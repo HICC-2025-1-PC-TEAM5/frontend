@@ -1,6 +1,6 @@
 // src/pages/Recipes/Recipe/Recipe.jsx
 import { useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import styles from './Recipe.module.css';
 import RecipeInfo from '../components/RecipeInfo';
 import ImageCoin from '../../../components/ImageCoin';
@@ -22,8 +22,6 @@ import { useUser } from '../../UserContext';
 export default function Recipe() {
   const { recipeid: id } = useParams(); // 라우트: RecipesRouter의 ':recipeid' (F6)
   const navigate = useNavigate();
-  // 추천 목록에서 들어오면 소비기한 지난 재료 이름이 넘어온다 (RecipeCard)
-  const expiredIngredients = useLocation().state?.expiredIngredients;
   // 로그인 사용자의 id만 쓴다. 서버가 {userId}와 로그인 사용자가 같은지 검사한다 (D-012)
   const { id: userId } = useUser();
   const handleBack = () => navigate(-1);
@@ -34,7 +32,9 @@ export default function Recipe() {
   // ✅ API 상태
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
-  const [detail, setDetail] = useState(null); // { recipe, recipeGuide }
+  const [detail, setDetail] = useState(null); // { recipe, recipeGuide, expiredIngredients }
+  // 소비기한 지난 레시피 재료. 어느 화면에서 들어와도 상세 응답에 들어 있다 (D-038)
+  const expiredIngredients = detail?.expiredIngredients;
 
   useEffect(() => {
     if (!userId) return; // 유저 준비 전엔 호출 안 함
