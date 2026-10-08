@@ -7,11 +7,29 @@ import DateInput from '../../../components/DateInput';
 import Wrapper from '../../../components/Wrapper';
 import Stack from '../../../components/Stack';
 import OptionsInput from '../../../components/OptionsInput';
+import { useUser } from '../../UserContext';
 import styles from './ProfileSetting.module.css';
 
 export default function ProfileSetting() {
   const navigate = useNavigate();
   const [selectedPurpose, setSelectedPurpose] = useState(null);
+  const { logout } = useUser();
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState('');
+
+  // 로그아웃: 서버에서 이 기기의 로그인 기록을 지운 뒤 로그인 화면으로 (D-037)
+  const handleLogout = async () => {
+    if (!window.confirm('로그아웃할까요?')) return;
+    setLoggingOut(true);
+    setLogoutError('');
+    try {
+      await logout();
+      navigate('/login', { replace: true });
+    } catch (e) {
+      setLogoutError(e.message);
+      setLoggingOut(false);
+    }
+  };
 
   const cookingPurposes = ['맛있게 먹는 게 중요해요', '건강을 위해 요리해요'];
 
@@ -77,6 +95,23 @@ export default function ProfileSetting() {
               </Button>
             ))}
           </Stack>
+        </div>
+
+        {/* 계정 */}
+        <div className={styles.account}>
+          <Button
+            variant="outlined"
+            className={styles.logoutButton}
+            onClick={handleLogout}
+            disabled={loggingOut}
+          >
+            {loggingOut ? '로그아웃 중…' : '로그아웃'}
+          </Button>
+          {logoutError && (
+            <p role="alert" className={styles.errorText}>
+              {logoutError}
+            </p>
+          )}
         </div>
       </Wrapper>
       <Nav />

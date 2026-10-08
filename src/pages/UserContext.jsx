@@ -6,7 +6,7 @@ import {
   setAccessToken,
   subscribeAccessToken,
 } from '../lib/api';
-import { restoreSession } from '../lib/auth';
+import { logoutSession, restoreSession } from '../lib/auth';
 
 const UserContext = createContext(null);
 
@@ -83,8 +83,12 @@ export function UserProvider({ children }) {
     login(payload.tokens?.accessToken, payload.user || {});
   };
 
-  /** 로그아웃 (메모리만 비운다. 서버 로그아웃 호출은 버튼을 만들 때 함께 붙인다) */
-  const logout = () => {
+  /**
+   * 로그아웃: 서버에서 이 기기의 refresh 토큰을 지운 뒤 메모리를 비운다 (D-037).
+   * 서버 호출이 실패하면 던지고 로그인 상태를 유지한다(쿠키가 남아 새로고침 때 다시 로그인되기 때문)
+   */
+  const logout = async () => {
+    await logoutSession();
     clearAccessToken();
     setUser(null);
     setStatus('guest');

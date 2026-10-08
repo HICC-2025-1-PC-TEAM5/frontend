@@ -9,3 +9,15 @@
   color: #777;
   margin-top: 0.5rem;
 }
+.account {
+  margin-top: 2.5rem;
+  margin-bottom: 2rem;
+}
+.logoutButton {
+  width: 100%;
+}
+.errorText {
+  font-size: 0.875rem;
+  color: #d33;
+  margin-top: 0.5rem;
+}

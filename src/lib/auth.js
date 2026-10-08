@@ -46,3 +46,17 @@ async function doRestoreSession() {
     throw e;
   }
 }
+
+/**
+ * 서버 로그아웃: 이 기기의 refresh 토큰을 지우고(DB·쿠키) tokenVersion을 올린다 (D-037)
+ * 실패하면 한글 메시지로 던진다. 쿠키가 남아 있으면 새로고침 때 다시 로그인되므로 화면도 로그아웃하지 않는다
+ */
+export async function logoutSession() {
+  try {
+    await api.post('/api/auth/logout', null, { _skipRefresh: true });
+  } catch (err) {
+    const e = new Error('로그아웃하지 못했어요. 잠시 후 다시 시도해 주세요.');
+    e.status = err?.response?.status ?? 0;
+    throw e;
+  }
+}
