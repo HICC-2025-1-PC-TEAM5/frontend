@@ -17,6 +17,7 @@ import {
 } from '../../../lib/fridge';
 import UsedIngredientsSheet from '../components/UsedIngredientsSheet';
 import ExpiredNotice from '../components/ExpiredNotice';
+import SubstituteNotice from '../components/SubstituteNotice';
 import { useUser } from '../../UserContext';
 
 export default function Recipe() {
@@ -32,7 +33,7 @@ export default function Recipe() {
   // ✅ API 상태
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
-  const [detail, setDetail] = useState(null); // { recipe, recipeGuide, expiredIngredients }
+  const [detail, setDetail] = useState(null); // { recipe, recipeGuide, expiredIngredients, substitutes }
   // 소비기한 지난 레시피 재료. 어느 화면에서 들어와도 상세 응답에 들어 있다 (D-038)
   const expiredIngredients = detail?.expiredIngredients;
 
@@ -173,6 +174,7 @@ export default function Recipe() {
             />
           )}
           {!loading && !err && <ExpiredNotice names={expiredIngredients} />}
+          {!loading && !err && <SubstituteNotice items={detail?.substitutes} />}
         </Wrapper>
       </div>
 

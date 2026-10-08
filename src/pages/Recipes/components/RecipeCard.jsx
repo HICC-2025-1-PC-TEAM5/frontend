@@ -4,6 +4,7 @@ import SaveToggleButton from '../../../components/SaveToggleButton';
 import PeopleIcon from '../../../assets/svg/Recipe/people.svg?react';
 import { useSavedRecipes } from '../SavedRecipesContext';
 import ExpiredNotice from './ExpiredNotice';
+import SubstituteNotice from './SubstituteNotice';
 import styles from './RecipeCard.module.css';
 
 // 서버 portion은 이미 "1인분"처럼 단위가 붙어 온다. 숫자만 올 때만 "인분"을 붙인다 (F7)
@@ -18,6 +19,7 @@ export default function RecipeCard({
   imageSrc,
   servings,
   expiredIngredients,
+  substitutes,
 }) {
   const navigate = useNavigate();
   const { isSaved, add, remove } = useSavedRecipes();
@@ -60,6 +62,7 @@ export default function RecipeCard({
         )}
 
         <ExpiredNotice names={expiredIngredients} compact />
+        <SubstituteNotice items={substitutes} compact />
       </div>
     </div>
   );
